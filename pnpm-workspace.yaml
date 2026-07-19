@@ -1,7 +1,5 @@
 packages:
-  - 'email'
-  - 'storage'
-  - 'memory'
+  - 'packages/*'
 
 allowBuilds:
   esbuild: true
