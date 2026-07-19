@@ -4,4 +4,4 @@
 'honojs-plugin-email': patch
 ---
 
-feat: update the versioning
+fix: update the package version and readme
