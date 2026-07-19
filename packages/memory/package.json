@@ -1,5 +1,5 @@
 {
-  "name": "@honojs-plugins/memory",
+  "name": "honojs-plugin-memory",
   "version": "0.0.0",
   "description": "Memory plugin for HonoJS",
   "type": "module",
