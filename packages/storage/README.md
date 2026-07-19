@@ -1,4 +1,4 @@
-# @honojs-plugins/storage
+# honojs-plugin-storage
 
 Storage plugin for HonoJS. Supports four drivers:
 
@@ -10,7 +10,7 @@ Storage plugin for HonoJS. Supports four drivers:
 ## Install
 
 ```bash
-pnpm add @honojs-plugins/storage
+pnpm add honojs-plugin-storage
 ```
 
 ## Folder structure
@@ -42,7 +42,7 @@ Every driver exposes:
 ### 1. Local disk
 
 ```ts
-import Storage, { LocalStorage } from '@honojs-plugins/storage'
+import Storage, { LocalStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   storageType: 'local',
@@ -72,7 +72,7 @@ const { data, signedUrl } = await storage.uploadFile({
 ### 2. AWS S3
 
 ```ts
-import Storage, { S3Storage } from '@honojs-plugins/storage'
+import Storage, { S3Storage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   storageType: 's3',
@@ -105,7 +105,7 @@ const { data, signedUrl } = await storage.uploadFile({
 ### 3. MinIO
 
 ```ts
-import Storage, { MinIOStorage } from '@honojs-plugins/storage'
+import Storage, { MinIOStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   storageType: 'minio',
@@ -128,7 +128,7 @@ const { signedUrl } = await storage.uploadFile({ directory: 'files', file /* Fil
 ### 4. Google Cloud Storage
 
 ```ts
-import Storage, { GoogleCloudStorage } from '@honojs-plugins/storage'
+import Storage, { GoogleCloudStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   storageType: 'gcs',
@@ -150,7 +150,7 @@ const { signedUrl } = await storage.uploadFile({ directory: 'files', file /* Fil
 
 ```ts
 import { Hono } from 'hono'
-import Storage, { S3Storage } from '@honojs-plugins/storage'
+import Storage, { S3Storage } from 'honojs-plugin-storage'
 
 const app = new Hono()
 
@@ -196,18 +196,18 @@ export default app
 
 ### `Storage.create({ storageType, params })`
 
-| `storageType` | `params` shape |
-|---|---|
-| `'local'` | `LocalStorageParams` — `{ basePath, baseUrl? }` |
-| `'s3'` | `S3StorageParams` — `{ access_key, secret_key, bucket, expires, region }` |
-| `'minio'` | `MinIOStorageParams` — `{ access_key, secret_key, bucket, expires, region, host, port, ssl }` |
-| `'gcs'` | `GoogleCloudStorageParams` — `{ access_key, bucket, expires, filepath }` |
+| `storageType` | `params` shape                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| `'local'`     | `LocalStorageParams` — `{ basePath, baseUrl? }`                                               |
+| `'s3'`        | `S3StorageParams` — `{ access_key, secret_key, bucket, expires, region }`                     |
+| `'minio'`     | `MinIOStorageParams` — `{ access_key, secret_key, bucket, expires, region, host, port, ssl }` |
+| `'gcs'`       | `GoogleCloudStorageParams` — `{ access_key, bucket, expires, filepath }`                      |
 
 ### Common driver methods
 
-| Method | Description |
-|---|---|
-| `initialize()` | Creates the bucket/base directory if it doesn't exist |
-| `uploadFile({ directory, file })` | Uploads `file` under `directory`, returns `{ data, signedUrl }` |
-| `presignedUrl(keyfile)` | Returns a signed/accessible URL for `keyfile` |
-| `expiresObject()` | (S3/MinIO/GCS) returns `{ expiresIn, expiryDate }` derived from `expires` |
+| Method                            | Description                                                               |
+| --------------------------------- | ------------------------------------------------------------------------- |
+| `initialize()`                    | Creates the bucket/base directory if it doesn't exist                     |
+| `uploadFile({ directory, file })` | Uploads `file` under `directory`, returns `{ data, signedUrl }`           |
+| `presignedUrl(keyfile)`           | Returns a signed/accessible URL for `keyfile`                             |
+| `expiresObject()`                 | (S3/MinIO/GCS) returns `{ expiresIn, expiryDate }` derived from `expires` |

@@ -1,4 +1,4 @@
-# @honojs-plugins/email
+# honojs-plugin-email
 
 Email plugin for HonoJS. Supports two drivers:
 
@@ -8,7 +8,7 @@ Email plugin for HonoJS. Supports two drivers:
 ## Install
 
 ```bash
-pnpm add @honojs-plugins/email
+pnpm add honojs-plugin-email
 ```
 
 ## Folder structure
@@ -30,7 +30,7 @@ src/
 ### 1. SMTP (Nodemailer)
 
 ```ts
-import Smtp, { Nodemailer } from '@honojs-plugins/email'
+import Smtp, { Nodemailer } from 'honojs-plugin-email'
 
 const mailer = Smtp.create({
   driver: 'smtp',
@@ -59,7 +59,7 @@ await mailer.send({
 ### 2. Resend
 
 ```ts
-import Smtp, { Resend } from '@honojs-plugins/email'
+import Smtp, { Resend } from 'honojs-plugin-email'
 
 const resend = Smtp.create({
   driver: 'resend',
@@ -80,7 +80,7 @@ await resend.emails.send({
 ### 3. Using Nodemailer directly
 
 ```ts
-import { Nodemailer } from '@honojs-plugins/email'
+import { Nodemailer } from 'honojs-plugin-email'
 
 const mailer = new Nodemailer({
   transporter: {
@@ -99,7 +99,7 @@ await mailer.send({ to: 'user@example.com', subject: 'Hi', text: 'Hello' })
 
 ```ts
 import { Hono } from 'hono'
-import Smtp, { Nodemailer } from '@honojs-plugins/email'
+import Smtp, { Nodemailer } from 'honojs-plugin-email'
 
 const app = new Hono()
 
@@ -133,17 +133,17 @@ export default app
 
 ### `Smtp.create(config)`
 
-| Param | Type | Description |
-|---|---|---|
-| `config.driver` | `'smtp' \| 'resend'` | Which email driver to use |
-| `config.nodemailer` | `NodemailerConfig` | Required when `driver` is `'smtp'` |
-| `config.resend` | `ResendConfig` | Required when `driver` is `'resend'` |
+| Param               | Type                 | Description                          |
+| ------------------- | -------------------- | ------------------------------------ |
+| `config.driver`     | `'smtp' \| 'resend'` | Which email driver to use            |
+| `config.nodemailer` | `NodemailerConfig`   | Required when `driver` is `'smtp'`   |
+| `config.resend`     | `ResendConfig`       | Required when `driver` is `'resend'` |
 
 Returns a `Nodemailer` instance or the `Resend` client, depending on `driver`.
 
 ### `Nodemailer`
 
-| Method | Description |
-|---|---|
-| `initialize()` | Verifies the SMTP transporter connection |
+| Method          | Description                                     |
+| --------------- | ----------------------------------------------- |
+| `initialize()`  | Verifies the SMTP transporter connection        |
 | `send(options)` | Sends an email via `nodemailer.SendMailOptions` |

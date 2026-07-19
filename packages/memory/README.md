@@ -1,4 +1,4 @@
-# @honojs-plugins/memory
+# honojs-plugin-memory
 
 Cache plugin for HonoJS. Supports two drivers:
 
@@ -10,7 +10,7 @@ Both drivers implement the same `CacheDriver` interface, so they are interchange
 ## Install
 
 ```bash
-pnpm add @honojs-plugins/memory
+pnpm add honojs-plugin-memory
 ```
 
 ## Folder structure
@@ -33,13 +33,13 @@ src/
 ### 1. In-memory (LRU) cache
 
 ```ts
-import Cache, { MemoryCache } from '@honojs-plugins/memory'
+import Cache, { MemoryCache } from 'honojs-plugin-memory'
 
 const cache = Cache.create({
   cacheType: 'memory',
   params: {
-    max: 500,   // max entries
-    ttl: 60,    // default TTL in seconds (optional)
+    max: 500, // max entries
+    ttl: 60, // default TTL in seconds (optional)
   },
 }) as MemoryCache
 
@@ -53,7 +53,7 @@ await cache.clear()
 ### 2. Redis cache
 
 ```ts
-import Cache, { RedisCache } from '@honojs-plugins/memory'
+import Cache, { RedisCache } from 'honojs-plugin-memory'
 
 const cache = Cache.create({
   cacheType: 'redis',
@@ -79,7 +79,7 @@ cache.client.ping()
 
 ```ts
 import { Hono } from 'hono'
-import Cache, { RedisCache } from '@honojs-plugins/memory'
+import Cache, { RedisCache } from 'honojs-plugin-memory'
 
 const app = new Hono()
 
@@ -112,17 +112,17 @@ async function fetchUserFromDb(id: string) {
 
 ### `Cache.create({ cacheType, params })`
 
-| `cacheType` | `params` shape |
-|---|---|
-| `'memory'` | `MemoryConfig` — `{ max?: number (default 500), ttl?: number }` |
-| `'redis'` | `RedisConfig` — `{ host?: string (default '127.0.0.1'), port?: number (default 6379), password?, db?, keyPrefix?, ttl? }` |
+| `cacheType` | `params` shape                                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `'memory'`  | `MemoryConfig` — `{ max?: number (default 500), ttl?: number }`                                                           |
+| `'redis'`   | `RedisConfig` — `{ host?: string (default '127.0.0.1'), port?: number (default 6379), password?, db?, keyPrefix?, ttl? }` |
 
 ### `CacheDriver` interface (implemented by both drivers)
 
-| Method | Description |
-|---|---|
-| `get<T>(key)` | Returns the cached value, or `undefined` if missing/expired |
-| `set<T>(key, value, ttl?)` | Stores `value`, optionally overriding the default TTL (seconds) |
-| `has(key)` | Returns `true` if `key` exists |
-| `del(key)` | Removes `key` from the cache |
-| `clear()` | Clears the entire cache (or Redis DB via `flushdb` for `RedisCache`) |
+| Method                     | Description                                                          |
+| -------------------------- | -------------------------------------------------------------------- |
+| `get<T>(key)`              | Returns the cached value, or `undefined` if missing/expired          |
+| `set<T>(key, value, ttl?)` | Stores `value`, optionally overriding the default TTL (seconds)      |
+| `has(key)`                 | Returns `true` if `key` exists                                       |
+| `del(key)`                 | Removes `key` from the cache                                         |
+| `clear()`                  | Clears the entire cache (or Redis DB via `flushdb` for `RedisCache`) |

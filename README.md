@@ -7,7 +7,7 @@ A collection of framework-agnostic plugins for [HonoJS](https://hono.dev), manag
 ```
 honojs-plugins/
 ├── packages/
-│   ├── email/                 # @honojs-plugins/email — SMTP (Nodemailer) & Resend email driver
+│   ├── email/                 # honojs-plugin-email — SMTP (Nodemailer) & Resend email driver
 │   │   ├── src/
 │   │   │   ├── index.ts        # Smtp.create() factory, exports Nodemailer/Resend
 │   │   │   ├── nodemailer/     # Nodemailer wrapper (index.ts, types.ts)
@@ -15,7 +15,7 @@ honojs-plugins/
 │   │   ├── package.json
 │   │   └── tsdown.config.ts
 │   │
-│   ├── storage/                # @honojs-plugins/storage — Local, S3, MinIO, GCS storage drivers
+│   ├── storage/                # honojs-plugin-storage — Local, S3, MinIO, GCS storage drivers
 │   │   ├── src/
 │   │   │   ├── index.ts        # Storage.create() factory, exports all drivers & types
 │   │   │   ├── local/          # Local filesystem driver
@@ -28,7 +28,7 @@ honojs-plugins/
 │   │   ├── package.json
 │   │   └── tsdown.config.ts
 │   │
-│   └── memory/                  # @honojs-plugins/memory — In-memory (LRU) & Redis cache drivers
+│   └── memory/                  # honojs-plugin-memory — In-memory (LRU) & Redis cache drivers
 │       ├── src/
 │       │   ├── index.ts        # Cache.create() factory, exports MemoryCache/RedisCache
 │       │   ├── memory/          # LRU cache driver (lru-cache)
@@ -52,11 +52,11 @@ Each package under `packages/*` is published independently to npm as `@honojs-pl
 
 ## Packages
 
-| Package | npm name | Description | README |
-|---|---|---|---|
-| `email` | `@honojs-plugins/email` | Send emails via SMTP (Nodemailer) or Resend | [packages/email/README.md](./packages/email/README.md) |
-| `storage` | `@honojs-plugins/storage` | Upload files to Local disk, AWS S3, MinIO, or Google Cloud Storage | [packages/storage/README.md](./packages/storage/README.md) |
-| `memory` | `@honojs-plugins/memory` | Cache values in-process (LRU) or via Redis | [packages/memory/README.md](./packages/memory/README.md) |
+| Package   | npm name                | Description                                                        | README                                                     |
+| --------- | ----------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `email`   | `honojs-plugin-email`   | Send emails via SMTP (Nodemailer) or Resend                        | [packages/email/README.md](./packages/email/README.md)     |
+| `storage` | `honojs-plugin-storage` | Upload files to Local disk, AWS S3, MinIO, or Google Cloud Storage | [packages/storage/README.md](./packages/storage/README.md) |
+| `memory`  | `honojs-plugin-memory`  | Cache values in-process (LRU) or via Redis                         | [packages/memory/README.md](./packages/memory/README.md)   |
 
 ## Development
 
