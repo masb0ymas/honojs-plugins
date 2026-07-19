@@ -52,6 +52,5 @@ export type {
   S3StorageParams,
   StorageInstance,
   StorageParams,
-  StorageType
+  StorageType,
 } from './types/storage'
-

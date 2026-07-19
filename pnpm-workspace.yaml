@@ -1,7 +1,7 @@
 packages:
-  - "email"
-  - "storage"
-  - "memory"
+  - 'email'
+  - 'storage'
+  - 'memory'
 
 allowBuilds:
   esbuild: true
@@ -9,4 +9,4 @@ allowBuilds:
   unrs-resolver: true
 
 minimumReleaseAgeExclude:
-  - "@hono/node-server@2.0.10"
+  - '@hono/node-server@2.0.10'

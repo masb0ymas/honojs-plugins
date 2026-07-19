@@ -36,6 +36,7 @@
     "prettier": "^3.9.5",
     "publint": "^0.3.21",
     "tsdown": "^0.22.9",
+    "turbo": "^2.10.5",
     "typescript": "^7.0.2"
   },
   "packageManager": "pnpm@11.10.0",
