@@ -1,0 +1,16 @@
+.changeset
+.vscode
+.yarn
+
+# Casbin
+*.conf
+*.csv
+
+# Deprecated packages
+packages/node-ws
+
+# Lockfiles
+pnpm-lock.yaml
+
+# Generated files (must stay byte-identical to the prebuild output)
+packages/ua-blocker/src/generated.ts

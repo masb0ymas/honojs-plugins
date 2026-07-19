@@ -1,0 +1,18 @@
+{
+  "extends": "@tsconfig/strictest",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": true,
+    "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "types": []
+  },
+  "include": ["${configDir}/tsdown.config.ts", "${configDir}/package.json", "${configDir}/src"]
+}

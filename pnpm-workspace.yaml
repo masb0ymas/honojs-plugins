@@ -1,0 +1,12 @@
+packages:
+  - "email"
+  - "storage"
+  - "memory"
+
+allowBuilds:
+  esbuild: true
+  lightningcss: true
+  unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - "@hono/node-server@2.0.10"

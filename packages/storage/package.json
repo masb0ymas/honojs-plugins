@@ -1,0 +1,54 @@
+{
+  "name": "@honojs-plugins/storage",
+  "version": "0.0.0",
+  "description": "Storage plugin for HonoJS",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm -w run build:pkg",
+    "lint": "eslint",
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "keywords": [],
+  "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1090.0",
+    "@aws-sdk/s3-request-presigner": "^3.1090.0",
+    "@google-cloud/storage": "^7.21.0",
+    "date-fns": "^4.4.0",
+    "minio": "^8.0.7",
+    "zod": "^4.4.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true,
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masb0ymas/honojs-plugins.git",
+    "directory": "packages/storage"
+  },
+  "homepage": "https://github.com/masb0ymas/honojs-plugins",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

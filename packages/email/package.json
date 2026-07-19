@@ -1,0 +1,54 @@
+{
+  "name": "@honojs-plugins/email",
+  "version": "0.0.0",
+  "description": "Email plugin for HonoJS",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm -w run build:pkg",
+    "lint": "eslint",
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "keywords": [],
+  "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
+  "dependencies": {
+    "nodemailer": "^9.0.3",
+    "resend": "^6.17.2",
+    "zod": "^4.4.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true,
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masb0ymas/honojs-plugins.git",
+    "directory": "packages/email"
+  },
+  "homepage": "https://github.com/masb0ymas/honojs-plugins",
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

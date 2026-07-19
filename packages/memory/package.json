@@ -1,0 +1,51 @@
+{
+  "name": "@honojs-plugins/memory",
+  "version": "0.0.0",
+  "description": "Memory plugin for HonoJS",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm -w run build:pkg",
+    "lint": "eslint",
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "keywords": [],
+  "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
+  "dependencies": {
+    "ioredis": "^5.11.1",
+    "lru-cache": "^11.5.2",
+    "zod": "^4.4.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true,
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masb0ymas/honojs-plugins.git",
+    "directory": "packages/memory"
+  },
+  "homepage": "https://github.com/masb0ymas/honojs-plugins",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

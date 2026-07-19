@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "${configDir}/dist/tsconfig.tsbuildinfo"
+  },
+  "files": [],
+  "references": [
+    { "path": "packages/email" },
+    { "path": "packages/memory" },
+    { "path": "packages/storage" },
+    { "path": "./tsconfig.repo-config-files.json" }
+  ]
+}
