@@ -1,56 +1,24 @@
 import z from 'zod'
 
-export const ResendSchema = z
+export type ResendConfig = {
+  apiKey: string
+  from: string | undefined
+  baseUrl: string | undefined
+  userAgent: string | undefined
+}
+
+export const ResendSchema: z.Schema<ResendConfig> = z
   .object({
-    RESEND_API_KEY: z.string().optional(),
+    RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
     RESEND_FROM: z.string().optional(),
+    RESEND_BASE_URL: z.string().optional(),
+    RESEND_USER_AGENT: z.string().optional(),
   })
   .transform((val) => {
     return {
       apiKey: val.RESEND_API_KEY,
       from: val.RESEND_FROM,
+      baseUrl: val.RESEND_BASE_URL,
+      userAgent: val.RESEND_USER_AGENT,
     }
   })
-  .readonly() satisfies z.ZodReadonly<
-  z.ZodPipe<
-    z.ZodObject<
-      {
-        RESEND_API_KEY: z.ZodOptional<z.ZodString>
-        RESEND_FROM: z.ZodOptional<z.ZodString>
-      },
-      z.core.$strip
-    >,
-    z.ZodTransform<
-      {
-        apiKey: string | undefined
-        from: string | undefined
-      },
-      {
-        RESEND_API_KEY?: string | undefined
-        RESEND_FROM?: string | undefined
-      }
-    >
-  >
-> as z.ZodReadonly<
-  z.ZodPipe<
-    z.ZodObject<
-      {
-        RESEND_API_KEY: z.ZodOptional<z.ZodString>
-        RESEND_FROM: z.ZodOptional<z.ZodString>
-      },
-      z.core.$strip
-    >,
-    z.ZodTransform<
-      {
-        apiKey: string | undefined
-        from: string | undefined
-      },
-      {
-        RESEND_API_KEY?: string | undefined
-        RESEND_FROM?: string | undefined
-      }
-    >
-  >
->
-
-export type ResendConfig = z.infer<typeof ResendSchema>

@@ -1,19 +1,9 @@
 import z from 'zod'
 
-export const EmailSchema = z.object({
-  driver: z.enum(['smtp', 'resend']).optional(),
-}) satisfies z.ZodObject<{
-  driver: z.ZodOptional<
-    z.ZodEnum<{
-      smtp: 'smtp'
-      resend: 'resend'
-    }>
-  >
-}> as z.ZodObject<{
-  driver: z.ZodOptional<
-    z.ZodEnum<{
-      smtp: 'smtp'
-      resend: 'resend'
-    }>
-  >
-}>
+export type EmailDriver = {
+  driver: 'smtp' | 'resend'
+}
+
+export const EmailSchema: z.Schema<EmailDriver> = z.object({
+  driver: z.enum(['smtp', 'resend']),
+})
