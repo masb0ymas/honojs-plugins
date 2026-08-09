@@ -1,5 +1,11 @@
 # honojs-plugin-email
 
+## 1.0.1
+
+### Patch Changes
+
+- [#12](https://github.com/masb0ymas/honojs-plugins/pull/12) [`981062a`](https://github.com/masb0ymas/honojs-plugins/commit/981062a66bd7bd4f16f8d3f0d9ce20982f4c6da9) Thanks [@masb0ymas](https://github.com/masb0ymas)! - fixing minor configuration
+
 ## 1.0.0
 
 ### Major Changes
