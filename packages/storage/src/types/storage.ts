@@ -52,9 +52,10 @@ export type LocalStorageParams = {
 
 export type StorageType = 'local' | 's3' | 'minio' | 'gcs'
 
-export type StorageParams = {
-  storageType: StorageType
-  params: S3StorageParams | MinIOStorageParams | GoogleCloudStorageParams | LocalStorageParams
-}
+export type StorageParams =
+  | S3StorageParams
+  | MinIOStorageParams
+  | GoogleCloudStorageParams
+  | LocalStorageParams
 
 export type StorageInstance = S3Storage | MinIOStorage | GoogleCloudStorage | LocalStorage

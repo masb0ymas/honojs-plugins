@@ -14,7 +14,7 @@ export default class Storage {
    * @param params - Storage parameters
    * @returns Storage service instance
    */
-  static create({ params }: StorageParams): StorageInstance {
+  static create(params: StorageParams): StorageInstance {
     const parsed = StorageSchema.safeParse(params)
     if (!parsed.success) {
       throw new Error('Invalid storage parameters', {
@@ -72,12 +72,12 @@ export { default as LocalStorage } from './local'
 export { default as MinIOStorage } from './minio'
 
 export type {
-    GoogleCloudStorageParams,
-    LocalStorageParams,
-    MinIOStorageParams,
-    S3StorageParams,
-    StorageInstance,
-    StorageParams,
-    StorageType
+  GoogleCloudStorageParams,
+  LocalStorageParams,
+  MinIOStorageParams,
+  S3StorageParams,
+  StorageInstance,
+  StorageParams,
+  StorageType
 } from './types/storage'
 
