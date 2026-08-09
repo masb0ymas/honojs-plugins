@@ -1,3 +1,7 @@
+import S3Storage from './aws-s3'
+import GoogleCloudStorage from './google-cloud'
+import LocalStorage from './local'
+import MinIOStorage from './minio'
 import { StorageSchema } from './schema/storage'
 import { StorageInstance, StorageParams } from './types/storage'
 
@@ -10,32 +14,56 @@ export default class Storage {
    * @param params - Storage parameters
    * @returns Storage service instance
    */
-  static create({ storageType, params }: StorageParams): StorageInstance {
+  static create({ params }: StorageParams): StorageInstance {
     const parsed = StorageSchema.safeParse(params)
     if (!parsed.success) {
-      console.log(parsed.error)
-      throw new Error('Invalid environment variables')
+      throw new Error('Invalid storage parameters', {
+        cause: parsed.error,
+      })
     }
 
-    switch (storageType) {
+    const config = parsed.data
+
+    switch (config.provider) {
       case 'local':
-        // @ts-expect-error
-        return new LocalStorage(parsed.data)
+        return new LocalStorage({
+          basePath: config.basePath!,
+          ...(config.baseUrl !== undefined && { baseUrl: config.baseUrl }),
+        })
 
       case 's3':
-        // @ts-expect-error
-        return new S3Storage(parsed.data)
+        return new S3Storage({
+          access_key: config.accessKey!,
+          secret_key: config.secretKey!,
+          bucket: config.bucketName!,
+          expires: config.signExpired!,
+          region: config.region!,
+        })
 
       case 'minio':
-        // @ts-expect-error
-        return new MinIOStorage(parsed.data)
+        return new MinIOStorage({
+          access_key: config.accessKey!,
+          secret_key: config.secretKey!,
+          bucket: config.bucketName!,
+          expires: config.signExpired!,
+          region: config.region!,
+          host: config.host!,
+          port: config.port!,
+          ssl: config.ssl!,
+        })
 
       case 'gcs':
-        // @ts-expect-error
-        return new GoogleCloudStorage(parsed.data)
+        return new GoogleCloudStorage({
+          access_key: config.accessKey!,
+          bucket: config.bucketName!,
+          expires: config.signExpired!,
+          filepath: config.filepath!,
+        })
 
       default:
-        throw new Error('Invalid storage type')
+        throw new Error('Invalid storage type', {
+          cause: parsed.error,
+        })
     }
   }
 }
