@@ -77,7 +77,21 @@ pnpm lint
 pnpm format
 ```
 
+
+
 ## Publishing
+
+### How to publish version
+
+- Make sure to checkout to another branch (not `main`)
+- Run `pnpm changeset` to create a changeset
+- Commit the changeset file
+- Review the codebase and merge to `main`
+- After that, GitHub Actions will automatically create a PR to update the version
+- Review the PR and merge it
+- After that, GitHub Actions will automatically publish the new version
+
+### Manual publish (not recommended)
 
 This repo uses [Changesets](https://github.com/changesets/changesets):
 
