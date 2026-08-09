@@ -27,25 +27,25 @@ export default class Storage {
     switch (value.provider) {
       case 'local':
         return new LocalStorage({
-          basePath: value.basePath!,
-          ...(value.baseUrl !== undefined && { baseUrl: value.baseUrl }),
+          local_path: value.local_path!,
+          ...(value.local_url !== undefined && { local_url: value.local_url }),
         })
 
       case 's3':
         return new S3Storage({
-          access_key: value.accessKey!,
-          secret_key: value.secretKey!,
-          bucket: value.bucketName!,
-          expires: value.signExpired!,
+          access_key: value.access_key!,
+          secret_key: value.secret_key!,
+          bucket: value.bucket!,
+          expires: value.expires!,
           region: value.region!,
         })
 
       case 'minio':
         return new MinIOStorage({
-          access_key: value.accessKey!,
-          secret_key: value.secretKey!,
-          bucket: value.bucketName!,
-          expires: value.signExpired!,
+          access_key: value.access_key!,
+          secret_key: value.secret_key!,
+          bucket: value.bucket!,
+          expires: value.expires!,
           region: value.region!,
           host: value.host!,
           port: value.port!,
@@ -54,9 +54,9 @@ export default class Storage {
 
       case 'gcs':
         return new GoogleCloudStorage({
-          access_key: value.accessKey!,
-          bucket: value.bucketName!,
-          expires: value.signExpired!,
+          access_key: value.access_key!,
+          bucket: value.bucket!,
+          expires: value.expires!,
           filepath: value.filepath!,
         })
 
@@ -72,10 +72,10 @@ export { default as LocalStorage } from './local'
 export { default as MinIOStorage } from './minio'
 
 export type {
-  GoogleCloudStorageParams,
-  LocalStorageParams,
-  MinIOStorageParams,
-  S3StorageParams,
+  GoogleCloudStorageConfig,
+  LocalStorageConfig,
+  MinIOStorageConfig,
+  S3StorageConfig,
   StorageConfig,
   StorageInstance,
   StorageType
