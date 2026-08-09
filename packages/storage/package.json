@@ -1,6 +1,6 @@
 {
   "name": "honojs-plugin-storage",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Storage plugin for HonoJS",
   "type": "module",
   "sideEffects": false,
