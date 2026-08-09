@@ -1,5 +1,11 @@
 # honojs-plugin-storage
 
+## 1.0.2
+
+### Patch Changes
+
+- [#14](https://github.com/masb0ymas/honojs-plugins/pull/14) [`8361e9b`](https://github.com/masb0ymas/honojs-plugins/commit/8361e9ba50fbb5a267aa8e25ed5c345d8cdb901b) Thanks [@masb0ymas](https://github.com/masb0ymas)! - fixing miss configuration
+
 ## 1.0.1
 
 ### Patch Changes
