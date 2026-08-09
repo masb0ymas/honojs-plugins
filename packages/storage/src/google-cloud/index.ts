@@ -3,7 +3,7 @@ import { addDays } from 'date-fns'
 import fs from 'fs'
 import path from 'path'
 import { ms } from '../lib/date'
-import { GoogleCloudStorageParams, UploadFileParams } from '../types/storage'
+import { GoogleCloudStorageConfig, UploadFileParams } from '../types/storage'
 
 export default class GoogleCloudStorage {
   public client: GCS.Storage
@@ -13,7 +13,7 @@ export default class GoogleCloudStorage {
   private _bucket: string
   private _expires: string
 
-  constructor(params: GoogleCloudStorageParams) {
+  constructor(params: GoogleCloudStorageConfig) {
     this._access_key = params.access_key
     this._bucket = params.bucket
     this._expires = params.expires

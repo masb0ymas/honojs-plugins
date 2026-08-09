@@ -3,7 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { addDays } from 'date-fns'
 import fs from 'fs'
 import { ms } from '../lib/date'
-import { S3StorageParams, UploadFileParams } from '../types/storage'
+import { S3StorageConfig, UploadFileParams } from '../types/storage'
 
 export default class S3Storage {
   public client: S3Client.S3
@@ -13,7 +13,7 @@ export default class S3Storage {
   private _expires: string
   private _region: string
 
-  constructor(params: S3StorageParams) {
+  constructor(params: S3StorageConfig) {
     this._access_key = params.access_key
     this._secret_key = params.secret_key
     this._bucket = params.bucket
