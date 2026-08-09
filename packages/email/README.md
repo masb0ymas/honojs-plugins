@@ -19,10 +19,12 @@ src/
 ├── nodemailer/
 │   ├── index.ts           # Nodemailer wrapper class (initialize, send)
 │   └── types.ts           # NodemailerParams type
-└── schema/
-    ├── index.ts           # EmailSchema (driver: 'smtp' | 'resend')
-    ├── nodemailer.ts       # NodemailerSchema (MAIL_* env-shaped config)
-    └── resend.ts           # ResendSchema (RESEND_* env-shaped config)
+├── schema/
+│   ├── index.ts           # EmailSchema (driver: 'smtp' | 'resend')
+│   ├── nodemailer.ts       # NodemailerSchema / NodemailerRawSchema (MAIL_* env-shaped config)
+│   └── resend.ts           # ResendSchema / ResendRawSchema (RESEND_* env-shaped config)
+└── types/
+    └── email.ts            # EmailConfig, EmailType
 ```
 
 ## Usage
@@ -34,8 +36,7 @@ import Smtp, { Nodemailer } from 'honojs-plugin-email'
 
 const mailer = Smtp.create({
   driver: 'smtp',
-  nodemailer: {
-    driver: 'smtp',
+  config: {
     host: 'smtp.example.com',
     port: 587,
     from: 'no-reply@example.com',
@@ -56,6 +57,8 @@ await mailer.send({
 })
 ```
 
+> **Encryption values:** `ssl` or `tls` → sets `secure: true`. `starttls` → sets `requireTLS: true`. All fields in `config` are optional.
+
 ### 2. Resend
 
 ```ts
@@ -63,9 +66,11 @@ import Smtp, { Resend } from 'honojs-plugin-email'
 
 const resend = Smtp.create({
   driver: 'resend',
-  resend: {
-    apiKey: process.env.RESEND_API_KEY,
+  config: {
+    apiKey: process.env.RESEND_API_KEY!,
     from: 'no-reply@example.com',
+    baseUrl: 'https://api.resend.com', // optional
+    userAgent: 'my-app', // optional
   },
 }) as Resend
 
@@ -105,7 +110,7 @@ const app = new Hono()
 
 const mailer = Smtp.create({
   driver: 'smtp',
-  nodemailer: {
+  config: {
     host: process.env.MAIL_HOST,
     port: Number(process.env.MAIL_PORT),
     from: process.env.MAIL_FROM,
@@ -133,13 +138,33 @@ export default app
 
 ### `Smtp.create(config)`
 
-| Param               | Type                 | Description                          |
-| ------------------- | -------------------- | ------------------------------------ |
-| `config.driver`     | `'smtp' \| 'resend'` | Which email driver to use            |
-| `config.nodemailer` | `NodemailerConfig`   | Required when `driver` is `'smtp'`   |
-| `config.resend`     | `ResendConfig`       | Required when `driver` is `'resend'` |
+| Param           | Type                               | Description                   |
+| --------------- | ---------------------------------- | ----------------------------- |
+| `config.driver` | `'smtp' \| 'resend'`               | Which email driver to use     |
+| `config.config` | `NodemailerConfig \| ResendConfig` | Driver-specific configuration |
 
-Returns a `Nodemailer` instance or the `Resend` client, depending on `driver`.
+Returns a `Nodemailer` instance or the `Resend` client, depending on `driver`. Returns `undefined` if the driver is unrecognized.
+
+#### `NodemailerConfig`
+
+| Field        | Type                  | Default | Description                                           |
+| ------------ | --------------------- | ------- | ----------------------------------------------------- |
+| `host`       | `string \| undefined` | —       | SMTP host                                             |
+| `port`       | `number \| undefined` | —       | SMTP port                                             |
+| `from`       | `string \| undefined` | —       | Default sender address                                |
+| `username`   | `string \| undefined` | —       | SMTP auth username                                    |
+| `password`   | `string \| undefined` | —       | SMTP auth password                                    |
+| `encryption` | `string \| undefined` | —       | `'ssl'` / `'tls'` → secure, `'starttls'` → requireTLS |
+| `driver`     | `string \| undefined` | —       | Driver hint (informational)                           |
+
+#### `ResendConfig`
+
+| Field       | Type                  | Default | Description               |
+| ----------- | --------------------- | ------- | ------------------------- |
+| `apiKey`    | `string`              | —       | Resend API key (required) |
+| `from`      | `string \| undefined` | —       | Default sender address    |
+| `baseUrl`   | `string \| undefined` | —       | Custom API base URL       |
+| `userAgent` | `string \| undefined` | —       | Custom user agent         |
 
 ### `Nodemailer`
 

@@ -18,8 +18,10 @@ pnpm add honojs-plugin-memory
 ```
 src/
 ├── index.ts              # Cache.create() factory + exports
-├── memory/                # MemoryCache driver (lru-cache backed)
-├── redis/                 # RedisCache driver (ioredis backed)
+├── memory/
+│   └── index.ts           # MemoryCache driver (lru-cache backed)
+├── redis/
+│   └── index.ts           # RedisCache driver (ioredis backed)
 ├── schema/
 │   ├── index.ts            # CacheSchema (driver: 'memory' | 'redis')
 │   ├── memory.ts            # MemorySchema ({ max, ttl })
@@ -36,9 +38,9 @@ src/
 import Cache, { MemoryCache } from 'honojs-plugin-memory'
 
 const cache = Cache.create({
-  cacheType: 'memory',
-  params: {
-    max: 500, // max entries
+  driver: 'memory',
+  config: {
+    max: 500, // max entries (default: 500)
     ttl: 60, // default TTL in seconds (optional)
   },
 }) as MemoryCache
@@ -56,10 +58,10 @@ await cache.clear()
 import Cache, { RedisCache } from 'honojs-plugin-memory'
 
 const cache = Cache.create({
-  cacheType: 'redis',
-  params: {
-    host: '127.0.0.1',
-    port: 6379,
+  driver: 'redis',
+  config: {
+    host: '127.0.0.1', // default: '127.0.0.1'
+    port: 6379, // default: 6379
     password: process.env.REDIS_PASSWORD,
     db: 0,
     keyPrefix: 'myapp:',
@@ -84,8 +86,8 @@ import Cache, { RedisCache } from 'honojs-plugin-memory'
 const app = new Hono()
 
 const cache = Cache.create({
-  cacheType: 'redis',
-  params: { host: '127.0.0.1', port: 6379, ttl: 60 },
+  driver: 'redis',
+  config: { host: '127.0.0.1', port: 6379, ttl: 60 },
 }) as RedisCache
 
 app.get('/users/:id', async (c) => {
@@ -110,12 +112,12 @@ async function fetchUserFromDb(id: string) {
 
 ## API
 
-### `Cache.create({ cacheType, params })`
+### `Cache.create({ driver, config })`
 
-| `cacheType` | `params` shape                                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `'memory'`  | `MemoryConfig` — `{ max?: number (default 500), ttl?: number }`                                                           |
-| `'redis'`   | `RedisConfig` — `{ host?: string (default '127.0.0.1'), port?: number (default 6379), password?, db?, keyPrefix?, ttl? }` |
+| `driver`   | `config` shape                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `'memory'` | `MemoryConfig` — `{ max?: number (default 500), ttl?: number }`                                                           |
+| `'redis'`  | `RedisConfig` — `{ host?: string (default '127.0.0.1'), port?: number (default 6379), password?, db?, keyPrefix?, ttl? }` |
 
 ### `CacheDriver` interface (implemented by both drivers)
 

@@ -11,35 +11,32 @@ import { CacheInstance, CacheParams } from './types/cache'
 export default class Cache {
   /**
    * Create a cache service instance
-   * @param params - Cache parameters
+   * @param config - Cache configuration
    * @returns Cache service instance
    */
-  static create({ cacheType, params }: CacheParams): CacheInstance {
-    const parsed = CacheSchema.safeParse({ driver: cacheType })
+  static create({ driver, config }: CacheParams): CacheInstance {
+    const parsed = CacheSchema.safeParse({ driver })
     if (!parsed.success) {
-      console.log(parsed.error)
-      throw new Error('Invalid cache driver')
+      throw new Error('Invalid cache driver', { cause: parsed.error })
     }
 
     switch (parsed.data.driver) {
       case 'memory': {
-        const config = MemorySchema.safeParse(params)
-        if (!config.success) {
-          console.log(config.error)
-          throw new Error('Invalid memory cache configuration')
+        const parsed = MemorySchema.safeParse(config)
+        if (!parsed.success) {
+          throw new Error('Invalid memory cache configuration', { cause: parsed.error })
         }
 
-        return new MemoryCache(config.data)
+        return new MemoryCache(parsed.data)
       }
 
       case 'redis': {
-        const config = RedisSchema.safeParse(params)
-        if (!config.success) {
-          console.log(config.error)
-          throw new Error('Invalid redis cache configuration')
+        const parsed = RedisSchema.safeParse(config)
+        if (!parsed.success) {
+          throw new Error('Invalid redis cache configuration', { cause: parsed.error })
         }
 
-        return new RedisCache(config.data)
+        return new RedisCache(parsed.data)
       }
 
       default:
@@ -51,3 +48,4 @@ export default class Cache {
 export { default as MemoryCache } from './memory'
 export { default as RedisCache } from './redis'
 export type { CacheDriver, CacheInstance, CacheParams, CacheType } from './types/cache'
+

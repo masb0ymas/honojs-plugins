@@ -3,7 +3,7 @@ import GoogleCloudStorage from './google-cloud'
 import LocalStorage from './local'
 import MinIOStorage from './minio'
 import { StorageSchema } from './schema/storage'
-import { StorageInstance, StorageParams } from './types/storage'
+import { StorageConfig, StorageInstance } from './types/storage'
 
 /**
  * Storage service
@@ -11,57 +11,57 @@ import { StorageInstance, StorageParams } from './types/storage'
 export default class Storage {
   /**
    * Create a storage service instance
-   * @param params - Storage parameters
+   * @param config - Storage configuration
    * @returns Storage service instance
    */
-  static create({ params }: StorageParams): StorageInstance {
-    const parsed = StorageSchema.safeParse(params)
+  static create(config: StorageConfig): StorageInstance {
+    const parsed = StorageSchema.safeParse(config)
     if (!parsed.success) {
       throw new Error('Invalid storage parameters', {
         cause: parsed.error,
       })
     }
 
-    const config = parsed.data
+    const value = parsed.data
 
-    switch (config.provider) {
+    switch (value.provider) {
       case 'local':
         return new LocalStorage({
-          basePath: config.basePath!,
-          ...(config.baseUrl !== undefined && { baseUrl: config.baseUrl }),
+          basePath: value.basePath!,
+          ...(value.baseUrl !== undefined && { baseUrl: value.baseUrl }),
         })
 
       case 's3':
         return new S3Storage({
-          access_key: config.accessKey!,
-          secret_key: config.secretKey!,
-          bucket: config.bucketName!,
-          expires: config.signExpired!,
-          region: config.region!,
+          access_key: value.accessKey!,
+          secret_key: value.secretKey!,
+          bucket: value.bucketName!,
+          expires: value.signExpired!,
+          region: value.region!,
         })
 
       case 'minio':
         return new MinIOStorage({
-          access_key: config.accessKey!,
-          secret_key: config.secretKey!,
-          bucket: config.bucketName!,
-          expires: config.signExpired!,
-          region: config.region!,
-          host: config.host!,
-          port: config.port!,
-          ssl: config.ssl!,
+          access_key: value.accessKey!,
+          secret_key: value.secretKey!,
+          bucket: value.bucketName!,
+          expires: value.signExpired!,
+          region: value.region!,
+          host: value.host!,
+          port: value.port!,
+          ssl: value.ssl!,
         })
 
       case 'gcs':
         return new GoogleCloudStorage({
-          access_key: config.accessKey!,
-          bucket: config.bucketName!,
-          expires: config.signExpired!,
-          filepath: config.filepath!,
+          access_key: value.accessKey!,
+          bucket: value.bucketName!,
+          expires: value.signExpired!,
+          filepath: value.filepath!,
         })
 
       default:
-        throw new Error(`Unsupported storage provider: ${config.provider}`)
+        throw new Error(`Unsupported storage provider: ${value.provider}`)
     }
   }
 }
@@ -72,12 +72,12 @@ export { default as LocalStorage } from './local'
 export { default as MinIOStorage } from './minio'
 
 export type {
-    GoogleCloudStorageParams,
-    LocalStorageParams,
-    MinIOStorageParams,
-    S3StorageParams,
-    StorageInstance,
-    StorageParams,
-    StorageType
+  GoogleCloudStorageParams,
+  LocalStorageParams,
+  MinIOStorageParams,
+  S3StorageParams,
+  StorageConfig,
+  StorageInstance,
+  StorageType
 } from './types/storage'
 
