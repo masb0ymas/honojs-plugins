@@ -15,7 +15,7 @@ export default class Smtp {
    * @param config - Email configuration
    * @returns Email service instance
    */
-  static create({ driver, params }: EmailConfig): Nodemailer | Resend | undefined {
+  static create({ driver, config }: EmailConfig): Nodemailer | Resend | undefined {
     const parsed = EmailSchema.safeParse({ driver })
     if (!parsed.success) {
       throw new Error('Invalid email parameters', {
@@ -25,44 +25,48 @@ export default class Smtp {
 
     // SMTP using Nodemailer
     if (parsed.data.driver === 'smtp') {
-      const config = NodemailerSchema.safeParse(params)
-      if (!config.success) {
+      const parsed = NodemailerSchema.safeParse(config)
+      if (!parsed.success) {
         throw new Error('Invalid nodemailer configuration', {
-          cause: config.error,
+          cause: parsed.error,
         })
       }
 
+      const nodemailerConfig = parsed.data
+
       const transporter: SMTPTransport.Options = {
-        host: config.data.host,
-        port: config.data.port,
-        secure: config.data.encryption === 'ssl' || config.data.encryption === 'tls',
-        requireTLS: config.data.encryption === 'starttls',
+        host: nodemailerConfig.host,
+        port: nodemailerConfig.port,
+        secure: nodemailerConfig.encryption === 'ssl' || nodemailerConfig.encryption === 'tls',
+        requireTLS: nodemailerConfig.encryption === 'starttls',
         auth:
-          config.data.username && config.data.password
+          nodemailerConfig.username && nodemailerConfig.password
             ? {
-                user: config.data.username,
-                pass: config.data.password,
+                user: nodemailerConfig.username,
+                pass: nodemailerConfig.password,
               }
             : undefined,
       }
 
-      return new Nodemailer({ transporter, defaults: { from: config.data.from } })
+      return new Nodemailer({ transporter, defaults: { from: nodemailerConfig.from } })
     }
 
     // SMTP using Resend
     if (parsed.data.driver === 'resend') {
-      const config = ResendSchema.safeParse(params)
-      if (!config.success) {
+      const parsed = ResendSchema.safeParse(config)
+      if (!parsed.success) {
         throw new Error('Invalid resend configuration', {
-          cause: config.error,
+          cause: parsed.error,
         })
       }
 
-      const resendOptions: { baseUrl?: string; userAgent?: string } = {}
-      if (config.data.baseUrl) resendOptions.baseUrl = config.data.baseUrl
-      if (config.data.userAgent) resendOptions.userAgent = config.data.userAgent
+      const resendConfig = parsed.data
 
-      return new Resend(config.data.apiKey, resendOptions)
+      const resendOptions: { baseUrl?: string; userAgent?: string } = {}
+      if (resendConfig.baseUrl) resendOptions.baseUrl = resendConfig.baseUrl
+      if (resendConfig.userAgent) resendOptions.userAgent = resendConfig.userAgent
+
+      return new Resend(resendConfig.apiKey, resendOptions)
     }
 
     return undefined
