@@ -10,7 +10,8 @@ export type NodemailerConfig = {
   encryption: string | undefined
 }
 
-export const NodemailerSchema: z.Schema<NodemailerConfig> = z
+/** Schema for raw MAIL_* environment-variable input, transforms to normalized NodemailerConfig */
+export const NodemailerRawSchema: z.Schema<NodemailerConfig> = z
   .object({
     MAIL_DRIVER: z.string().optional(),
     MAIL_HOST: z.string().optional(),
@@ -31,3 +32,14 @@ export const NodemailerSchema: z.Schema<NodemailerConfig> = z
       encryption: val.MAIL_ENCRYPTION,
     }
   })
+
+/** Schema for validating a normalized NodemailerConfig object directly */
+export const NodemailerSchema = z.object({
+  driver: z.string().optional(),
+  host: z.string().optional(),
+  port: z.number().int().optional(),
+  from: z.string().optional(),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  encryption: z.string().optional(),
+}) as z.ZodType<NodemailerConfig>

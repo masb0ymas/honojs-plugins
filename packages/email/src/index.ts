@@ -47,7 +47,7 @@ export default class Smtp {
         secure: config.data.encryption === 'ssl' || config.data.encryption === 'tls',
         requireTLS: config.data.encryption === 'starttls',
         auth:
-          config.data.username || config.data.password
+          config.data.username && config.data.password
             ? {
                 user: config.data.username,
                 pass: config.data.password,
