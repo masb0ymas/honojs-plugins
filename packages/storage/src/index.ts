@@ -61,9 +61,7 @@ export default class Storage {
         })
 
       default:
-        throw new Error('Invalid storage type', {
-          cause: parsed.error,
-        })
+        throw new Error(`Unsupported storage provider: ${config.provider}`)
     }
   }
 }
@@ -74,11 +72,12 @@ export { default as LocalStorage } from './local'
 export { default as MinIOStorage } from './minio'
 
 export type {
-  GoogleCloudStorageParams,
-  LocalStorageParams,
-  MinIOStorageParams,
-  S3StorageParams,
-  StorageInstance,
-  StorageParams,
-  StorageType,
+    GoogleCloudStorageParams,
+    LocalStorageParams,
+    MinIOStorageParams,
+    S3StorageParams,
+    StorageInstance,
+    StorageParams,
+    StorageType
 } from './types/storage'
+
