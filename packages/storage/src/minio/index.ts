@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns'
 import * as Minio from 'minio'
 import { ms } from '../lib/date'
-import { MinIOStorageParams, UploadFileParams } from '../types/storage'
+import { MinIOStorageConfig, UploadFileParams } from '../types/storage'
 
 export default class MinIOStorage {
   public client: Minio.Client
@@ -14,7 +14,7 @@ export default class MinIOStorage {
   private _port: number
   private _ssl: boolean
 
-  constructor(params: MinIOStorageParams) {
+  constructor(params: MinIOStorageConfig) {
     this._access_key = params.access_key
     this._secret_key = params.secret_key
     this._bucket = params.bucket

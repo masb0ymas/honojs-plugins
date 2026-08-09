@@ -1,12 +1,12 @@
 import fs from 'fs'
 import path from 'path'
-import { LocalStorageParams, UploadFileParams } from '../types/storage'
+import { LocalStorageConfig, UploadFileParams } from '../types/storage'
 
 export default class LocalStorage {
   private _basePath: string
   private _baseUrl: string
 
-  constructor(params: LocalStorageParams) {
+  constructor(params: LocalStorageConfig) {
     this._basePath = path.resolve(`${process.cwd()}/${params.local_path}`)
     this._baseUrl = params.local_url ?? '/uploads'
   }
