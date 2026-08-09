@@ -1,11 +1,13 @@
 import z from 'zod'
 
-export const CacheSchema: z.ZodObject<{
+type CacheConfig = z.ZodObject<{
   driver: z.ZodEnum<{
     memory: 'memory'
     redis: 'redis'
   }>
-}> = z.object({
+}>
+
+export const CacheSchema: CacheConfig = z.object({
   driver: z.enum(['memory', 'redis']),
 })
 

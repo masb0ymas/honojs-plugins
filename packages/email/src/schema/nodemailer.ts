@@ -1,6 +1,17 @@
 import z from 'zod'
 
-export const NodemailerSchema = z
+export type NodemailerConfig = {
+  driver: string | undefined
+  host: string | undefined
+  port: number | undefined
+  from: string | undefined
+  username: string | undefined
+  password: string | undefined
+  encryption: string | undefined
+}
+
+/** Schema for raw MAIL_* environment-variable input, transforms to normalized NodemailerConfig */
+export const NodemailerRawSchema: z.Schema<NodemailerConfig> = z
   .object({
     MAIL_DRIVER: z.string().optional(),
     MAIL_HOST: z.string().optional(),
@@ -21,76 +32,14 @@ export const NodemailerSchema = z
       encryption: val.MAIL_ENCRYPTION,
     }
   })
-  .readonly() satisfies z.ZodReadonly<
-  z.ZodPipe<
-    z.ZodObject<
-      {
-        MAIL_DRIVER: z.ZodOptional<z.ZodString>
-        MAIL_HOST: z.ZodOptional<z.ZodString>
-        MAIL_PORT: z.ZodOptional<z.ZodCoercedNumber<unknown>>
-        MAIL_FROM: z.ZodOptional<z.ZodString>
-        MAIL_USERNAME: z.ZodOptional<z.ZodString>
-        MAIL_PASSWORD: z.ZodOptional<z.ZodString>
-        MAIL_ENCRYPTION: z.ZodOptional<z.ZodString>
-      },
-      z.core.$strip
-    >,
-    z.ZodTransform<
-      {
-        driver: string | undefined
-        host: string | undefined
-        port: number | undefined
-        from: string | undefined
-        username: string | undefined
-        password: string | undefined
-        encryption: string | undefined
-      },
-      {
-        MAIL_DRIVER?: string | undefined
-        MAIL_HOST?: string | undefined
-        MAIL_PORT?: number | undefined
-        MAIL_FROM?: string | undefined
-        MAIL_USERNAME?: string | undefined
-        MAIL_PASSWORD?: string | undefined
-        MAIL_ENCRYPTION?: string | undefined
-      }
-    >
-  >
-> as z.ZodReadonly<
-  z.ZodPipe<
-    z.ZodObject<
-      {
-        MAIL_DRIVER: z.ZodOptional<z.ZodString>
-        MAIL_HOST: z.ZodOptional<z.ZodString>
-        MAIL_PORT: z.ZodOptional<z.ZodCoercedNumber<unknown>>
-        MAIL_FROM: z.ZodOptional<z.ZodString>
-        MAIL_USERNAME: z.ZodOptional<z.ZodString>
-        MAIL_PASSWORD: z.ZodOptional<z.ZodString>
-        MAIL_ENCRYPTION: z.ZodOptional<z.ZodString>
-      },
-      z.core.$strip
-    >,
-    z.ZodTransform<
-      {
-        driver: string | undefined
-        host: string | undefined
-        port: number | undefined
-        from: string | undefined
-        username: string | undefined
-        password: string | undefined
-        encryption: string | undefined
-      },
-      {
-        MAIL_DRIVER?: string | undefined
-        MAIL_HOST?: string | undefined
-        MAIL_PORT?: number | undefined
-        MAIL_FROM?: string | undefined
-        MAIL_USERNAME?: string | undefined
-        MAIL_PASSWORD?: string | undefined
-        MAIL_ENCRYPTION?: string | undefined
-      }
-    >
-  >
->
 
-export type NodemailerConfig = z.infer<typeof NodemailerSchema>
+/** Schema for validating a normalized NodemailerConfig object directly */
+export const NodemailerSchema = z.object({
+  driver: z.string().optional(),
+  host: z.string().optional(),
+  port: z.number().int().optional(),
+  from: z.string().optional(),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  encryption: z.string().optional(),
+}) as z.ZodType<NodemailerConfig>
