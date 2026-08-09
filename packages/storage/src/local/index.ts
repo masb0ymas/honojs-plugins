@@ -7,8 +7,8 @@ export default class LocalStorage {
   private _baseUrl: string
 
   constructor(params: LocalStorageParams) {
-    this._basePath = path.resolve(`${process.cwd()}/${params.basePath}`)
-    this._baseUrl = params.baseUrl ?? '/uploads'
+    this._basePath = path.resolve(`${process.cwd()}/${params.local_path}`)
+    this._baseUrl = params.local_url ?? '/uploads'
   }
 
   /**

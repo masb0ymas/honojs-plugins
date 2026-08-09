@@ -19,14 +19,14 @@ export type FileParams = {
   size: number
 }
 
-export type GoogleCloudStorageParams = {
+export type GoogleCloudStorageConfig = {
   access_key: string
   bucket: string
   expires: string
   filepath: string
 }
 
-export type S3StorageParams = {
+export type S3StorageConfig = {
   access_key: string
   secret_key: string
   bucket: string
@@ -34,7 +34,7 @@ export type S3StorageParams = {
   region: string
 }
 
-export type MinIOStorageParams = {
+export type MinIOStorageConfig = {
   access_key: string
   secret_key: string
   bucket: string
@@ -45,14 +45,14 @@ export type MinIOStorageParams = {
   ssl: boolean
 }
 
-export type LocalStorageParams = {
-  basePath: string
-  baseUrl?: string
+export type LocalStorageConfig = {
+  local_path: string
+  local_url?: string
 }
 
 export type StorageType = 'local' | 's3' | 'minio' | 'gcs'
 
 export type StorageConfig =
-  S3StorageParams | MinIOStorageParams | GoogleCloudStorageParams | LocalStorageParams
+  S3StorageConfig | MinIOStorageConfig | GoogleCloudStorageConfig | LocalStorageConfig
 
 export type StorageInstance = S3Storage | MinIOStorage | GoogleCloudStorage | LocalStorage

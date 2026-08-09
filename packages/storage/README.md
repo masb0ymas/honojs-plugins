@@ -53,9 +53,9 @@ import Storage, { LocalStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   provider: 'local',
-  basePath: 'uploads',
-  baseUrl: '/uploads', // optional, defaults to '/uploads'
-}) as LocalStorage
+  local_path: 'uploads',
+  local_url: '/uploads', // optional, defaults to '/uploads'
+} as LocalStorageConfig) as LocalStorage
 
 await storage.initialize()
 
@@ -86,7 +86,7 @@ const storage = Storage.create({
   bucketName: 'my-bucket',
   region: 'us-east-1',
   signExpired: '7d', // presigned URL TTL
-}) as S3Storage
+} as S3StorageConfig) as S3Storage
 
 await storage.initialize()
 
@@ -123,7 +123,7 @@ const storage = Storage.create({
   port: 9000,
   ssl: false,
   signExpired: '7d',
-}) as MinIOStorage
+} as MinIOStorageConfig) as MinIOStorage
 
 await storage.initialize()
 const { signedUrl } = await storage.uploadFile({ directory: 'files', file /* FileParams */ })
@@ -143,7 +143,7 @@ const storage = Storage.create({
   bucketName: 'my-bucket',
   filepath: 'gcp-serviceAccount.json', // relative to process.cwd()
   signExpired: '7d',
-}) as GoogleCloudStorage
+} as GoogleCloudStorageConfig) as GoogleCloudStorage
 
 await storage.initialize()
 const { signedUrl } = await storage.uploadFile({ directory: 'files', file /* FileParams */ })
@@ -169,7 +169,7 @@ const storage = Storage.create({
   bucketName: process.env.STORAGE_BUCKET_NAME!,
   region: process.env.STORAGE_REGION!,
   signExpired: '7d',
-}) as S3Storage
+} as S3StorageConfig) as S3Storage
 
 app.post('/upload', async (c) => {
   const body = await c.req.parseBody()
