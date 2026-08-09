@@ -11,10 +11,10 @@ import { CacheInstance, CacheParams } from './types/cache'
 export default class Cache {
   /**
    * Create a cache service instance
-   * @param params - Cache parameters
+   * @param config - Cache configuration
    * @returns Cache service instance
    */
-  static create({ driver, params }: CacheParams): CacheInstance {
+  static create({ driver, config }: CacheParams): CacheInstance {
     const parsed = CacheSchema.safeParse({ driver })
     if (!parsed.success) {
       throw new Error('Invalid cache driver', { cause: parsed.error })
@@ -22,21 +22,21 @@ export default class Cache {
 
     switch (parsed.data.driver) {
       case 'memory': {
-        const config = MemorySchema.safeParse(params)
-        if (!config.success) {
-          throw new Error('Invalid memory cache configuration', { cause: config.error })
+        const parsed = MemorySchema.safeParse(config)
+        if (!parsed.success) {
+          throw new Error('Invalid memory cache configuration', { cause: parsed.error })
         }
 
-        return new MemoryCache(config.data)
+        return new MemoryCache(parsed.data)
       }
 
       case 'redis': {
-        const config = RedisSchema.safeParse(params)
-        if (!config.success) {
-          throw new Error('Invalid redis cache configuration', { cause: config.error })
+        const parsed = RedisSchema.safeParse(config)
+        if (!parsed.success) {
+          throw new Error('Invalid redis cache configuration', { cause: parsed.error })
         }
 
-        return new RedisCache(config.data)
+        return new RedisCache(parsed.data)
       }
 
       default:

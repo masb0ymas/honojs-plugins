@@ -7,7 +7,7 @@ export type CacheType = 'memory' | 'redis'
 
 export type CacheParams = {
   driver: CacheType
-  params: MemoryConfig | RedisConfig
+  config: MemoryConfig | RedisConfig
 }
 
 export type CacheInstance = MemoryCache | RedisCache
