@@ -2,14 +2,9 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { Resend } from 'resend'
 import Nodemailer from './nodemailer'
 import { EmailSchema } from './schema'
-import { NodemailerConfig, NodemailerSchema } from './schema/nodemailer'
-import { ResendConfig, ResendSchema } from './schema/resend'
-
-interface EmailConfig {
-  driver: 'smtp' | 'resend'
-  nodemailer?: NodemailerConfig
-  resend?: ResendConfig
-}
+import { NodemailerSchema } from './schema/nodemailer'
+import { ResendSchema } from './schema/resend'
+import { EmailConfig } from './types/email'
 
 /**
  * SMTP email service
@@ -20,7 +15,7 @@ export default class Smtp {
    * @param config - Email configuration
    * @returns Email service instance
    */
-  static create({ driver, nodemailer, resend }: EmailConfig): Nodemailer | Resend | undefined {
+  static create({ driver, params }: EmailConfig): Nodemailer | Resend | undefined {
     const parsed = EmailSchema.safeParse({ driver })
     if (!parsed.success) {
       throw new Error('Invalid email parameters', {
@@ -30,11 +25,7 @@ export default class Smtp {
 
     // SMTP using Nodemailer
     if (parsed.data.driver === 'smtp') {
-      if (!nodemailer) {
-        throw new Error('Nodemailer configuration is required when driver is smtp')
-      }
-
-      const config = NodemailerSchema.safeParse(nodemailer)
+      const config = NodemailerSchema.safeParse(params)
       if (!config.success) {
         throw new Error('Invalid nodemailer configuration', {
           cause: config.error,
@@ -60,11 +51,7 @@ export default class Smtp {
 
     // SMTP using Resend
     if (parsed.data.driver === 'resend') {
-      if (!resend) {
-        throw new Error('Resend configuration is required when driver is resend')
-      }
-
-      const config = ResendSchema.safeParse(resend)
+      const config = ResendSchema.safeParse(params)
       if (!config.success) {
         throw new Error('Invalid resend configuration', {
           cause: config.error,
