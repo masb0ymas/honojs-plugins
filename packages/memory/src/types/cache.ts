@@ -6,7 +6,7 @@ import { RedisConfig } from '../schema/redis'
 export type CacheType = 'memory' | 'redis'
 
 export type CacheParams = {
-  cacheType: CacheType
+  driver: CacheType
   params: MemoryConfig | RedisConfig
 }
 
