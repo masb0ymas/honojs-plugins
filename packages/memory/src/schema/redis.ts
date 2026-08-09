@@ -1,13 +1,15 @@
 import z from 'zod'
 
-export const RedisSchema: z.ZodObject<{
+type RedisObjectSchema = z.ZodObject<{
   host: z.ZodDefault<z.ZodString>
   port: z.ZodDefault<z.ZodNumber>
   password: z.ZodOptional<z.ZodString>
   db: z.ZodOptional<z.ZodNumber>
   keyPrefix: z.ZodOptional<z.ZodString>
   ttl: z.ZodOptional<z.ZodNumber>
-}> = z.object({
+}>
+
+export const RedisSchema: RedisObjectSchema = z.object({
   host: z.string().default('127.0.0.1'),
   port: z.number().int().positive().default(6379),
   password: z.string().optional(),
