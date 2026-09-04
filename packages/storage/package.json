@@ -15,15 +15,22 @@
     "lint": "eslint",
     "typecheck": "tsc -b tsconfig.json"
   },
-  "keywords": [],
+  "keywords": [
+    "storage",
+    "s3",
+    "s3-compatible",
+    "minio",
+    "google-cloud-storage",
+    "honojs"
+  ],
   "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1090.0",
-    "@aws-sdk/s3-request-presigner": "^3.1090.0",
+    "@aws-sdk/client-s3": "^3.1126.0",
+    "@aws-sdk/s3-request-presigner": "^3.1126.0",
     "@google-cloud/storage": "^7.21.0",
     "date-fns": "^4.4.0",
     "minio": "^8.0.7",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "exports": {
     ".": "./src/index.ts",

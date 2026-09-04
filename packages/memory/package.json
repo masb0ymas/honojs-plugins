@@ -15,12 +15,17 @@
     "lint": "eslint",
     "typecheck": "tsc -b tsconfig.json"
   },
-  "keywords": [],
+  "keywords": [
+    "redis",
+    "lru-cache",
+    "memory",
+    "honojs"
+  ],
   "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
   "dependencies": {
     "ioredis": "^5.11.1",
     "lru-cache": "^11.5.2",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "exports": {
     ".": "./src/index.ts",

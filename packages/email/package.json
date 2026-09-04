@@ -15,12 +15,20 @@
     "lint": "eslint",
     "typecheck": "tsc -b tsconfig.json"
   },
-  "keywords": [],
+  "keywords": [
+    "nodemailer",
+    "resend",
+    "email",
+    "honojs"
+  ],
   "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
   "dependencies": {
-    "nodemailer": "^9.0.3",
-    "resend": "^6.17.2",
-    "zod": "^4.4.3"
+    "nodemailer": "^9.1.1",
+    "resend": "^6.26.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.1"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -45,9 +53,6 @@
     "directory": "packages/email"
   },
   "homepage": "https://github.com/masb0ymas/honojs-plugins",
-  "devDependencies": {
-    "@types/nodemailer": "^8.0.1"
-  },
   "engines": {
     "node": ">=20.0.0"
   }
