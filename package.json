@@ -17,7 +17,8 @@
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
     "lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
     "format": "prettier --check . --cache --cache-location .cache/.prettiercache",
-    "format:fix": "prettier --write . --cache --cache-location .cache/.prettiercache"
+    "format:fix": "prettier --write . --cache --cache-location .cache/.prettiercache",
+    "release": "pnpm changeset"
   },
   "keywords": [],
   "author": "masb0ymas",
