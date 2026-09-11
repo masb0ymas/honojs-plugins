@@ -1,6 +1,6 @@
 {
   "name": "honojs-plugin-memory",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Memory plugin for HonoJS",
   "type": "module",
   "sideEffects": false,
