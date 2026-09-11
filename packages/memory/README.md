@@ -121,10 +121,10 @@ async function fetchUserFromDb(id: string) {
 
 ### `CacheDriver` interface (implemented by both drivers)
 
-| Method                     | Description                                                          |
-| -------------------------- | -------------------------------------------------------------------- |
-| `get<T>(key)`              | Returns the cached value, or `undefined` if missing/expired          |
-| `set<T>(key, value, ttl?)` | Stores `value`, optionally overriding the default TTL (seconds)      |
-| `has(key)`                 | Returns `true` if `key` exists                                       |
-| `del(key)`                 | Removes `key` from the cache                                         |
-| `clear()`                  | Clears the entire cache (or Redis DB via `flushdb` for `RedisCache`) |
+| Method                     | Description                                                                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `get<T>(key)`              | Returns the cached value, or `undefined` if missing/expired                                                                  |
+| `set<T>(key, value, ttl?)` | Stores `value`, optionally overriding the default TTL (seconds)                                                              |
+| `has(key)`                 | Returns `true` if `key` exists                                                                                               |
+| `del(key)`                 | Removes `key` from the cache                                                                                                 |
+| `clear()`                  | Clears the cache. `RedisCache` deletes only keys under its `keyPrefix` (or the whole DB via `flushdb` when no prefix is set) |

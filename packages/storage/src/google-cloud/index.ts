@@ -1,26 +1,31 @@
 import * as GCS from '@google-cloud/storage'
-import { addDays } from 'date-fns'
 import fs from 'fs'
 import path from 'path'
-import { ms } from '../lib/date'
-import { GoogleCloudStorageConfig, UploadFileParams } from '../types/storage'
+import { errorMessage, isNotFoundError } from '../lib/errors'
+import { resolveExpires, type ExpiresObject } from '../lib/expires'
+import { buildKeyfile } from '../lib/keys'
+import {
+  GoogleCloudStorageConfig,
+  GoogleCloudUploadResult,
+  UploadFileParams,
+} from '../types/storage'
 
 export default class GoogleCloudStorage {
   public client: GCS.Storage
 
-  private _access_key: string
+  private _projectId: string
   private _filepath: string
   private _bucket: string
   private _expires: string
 
   constructor(params: GoogleCloudStorageConfig) {
-    this._access_key = params.access_key
+    this._projectId = params.access_key
     this._bucket = params.bucket
     this._expires = params.expires
-    this._filepath = path.resolve(`${process.cwd()}/${params.filepath}`)
+    this._filepath = path.resolve(process.cwd(), params.filepath)
 
-    if (!this._access_key && !fs.existsSync(this._filepath)) {
-      const message = `google cloud serviceAccount is missing on root directory`
+    if (!fs.existsSync(this._filepath)) {
+      const message = `google cloud service account is missing on root directory`
       console.error(message)
 
       throw new Error(
@@ -28,34 +33,17 @@ export default class GoogleCloudStorage {
       )
     }
 
-    if (this._access_key) {
-      const message = `google cloud - ${this._filepath}`
-      console.info(message)
-    }
-
     this.client = new GCS.Storage({
-      projectId: this._access_key,
+      projectId: this._projectId,
       keyFilename: this._filepath,
     })
   }
 
   /**
-   * Generate keyfile
-   */
-  private _generateKeyfile(values: string[]) {
-    return values.join('/')
-  }
-
-  /**
    * Get expires object
    */
-  public expiresObject(): { expiresIn: number; expiryDate: Date } {
-    const getExpired = this._expires.replace(/[^0-9]/g, '')
-
-    const expiresIn = ms(this._expires)
-    const expiryDate = addDays(new Date(), Number(getExpired))
-
-    return { expiresIn, expiryDate }
+  public expiresObject(): ExpiresObject {
+    return resolveExpires(this._expires)
   }
 
   /**
@@ -64,19 +52,27 @@ export default class GoogleCloudStorage {
   async initialize(): Promise<void> {
     const bucketName = this._bucket
 
-    try {
-      const data = this.client.bucket(bucketName)
-      const getBucket = await data.exists()
-      const getMetadata = await data.getMetadata()
+    const bucket = this.client.bucket(bucketName)
 
-      if (getBucket[0]) {
-        const message = `google cloud - ${bucketName} bucket found`
-        console.info(message)
-        console.log(getMetadata[0])
+    try {
+      const [exists] = await bucket.exists()
+
+      if (!exists) {
+        await this._createBucket()
+        return
       }
-    } catch (error) {
-      const message = `google cloud - ${bucketName} bucket not found`
-      console.error(message)
+
+      const [metadata] = await bucket.getMetadata()
+
+      const message = `google cloud - ${bucketName} bucket found`
+      console.info(message)
+      console.log(metadata)
+    } catch (error: unknown) {
+      if (!isNotFoundError(error)) {
+        console.error(`google cloud - ${bucketName} initialize failed: ${errorMessage(error)}`)
+        throw error
+      }
+
       // create bucket if not exists
       await this._createBucket()
     }
@@ -85,20 +81,20 @@ export default class GoogleCloudStorage {
   /**
    * Create bucket
    */
-  private async _createBucket() {
+  private async _createBucket(): Promise<void> {
     const bucketName = this._bucket
 
     try {
-      const data = await this.client.createBucket(bucketName)
-      const getMetadata = await data[0].getMetadata()
+      const [bucket] = await this.client.createBucket(bucketName)
+      const [metadata] = await bucket.getMetadata()
 
       const message = `google cloud - ${bucketName} bucket created`
       console.info(message)
-      console.log(getMetadata[0])
-    } catch (error: any) {
-      const message = `google cloud error: ${error.message ?? error}`
+      console.log(metadata)
+    } catch (error: unknown) {
+      const message = `google cloud error: ${errorMessage(error)}`
       console.error(message)
-      process.exit(1)
+      throw new Error(message, { cause: error })
     }
   }
 
@@ -108,8 +104,8 @@ export default class GoogleCloudStorage {
   async uploadFile({
     directory,
     file,
-  }: UploadFileParams): Promise<{ data: any; signedUrl: string }> {
-    const keyfile = this._generateKeyfile([directory, file.filename])
+  }: UploadFileParams): Promise<{ data: GoogleCloudUploadResult; signedUrl: string }> {
+    const keyfile = buildKeyfile([directory, file.filename])
 
     // For a destination object that does not yet exist,
     // set the ifGenerationMatch precondition to 0
@@ -139,11 +135,10 @@ export default class GoogleCloudStorage {
       version: 'v4',
       action: 'read',
       virtualHostedStyle: true,
-      expires: Date.now() + expiresIn,
+      expires: Date.now() + expiresIn * 1000,
     }
 
-    const data = await this.client.bucket(bucketName).file(keyfile).getSignedUrl(options)
-    const signedUrl = data[0]
+    const [signedUrl] = await this.client.bucket(bucketName).file(keyfile).getSignedUrl(options)
 
     const message = `google cloud - ${keyfile} presigned URL generated`
     console.info(message)

@@ -19,7 +19,17 @@ export type FileParams = {
   size: number
 }
 
+/** Result returned by MinIO's `fPutObject`. */
+export type MinIOUploadResult = {
+  etag: string
+  versionId: string | null
+}
+
+/** Result returned by GCS's `Bucket.upload` (the uploaded `File`). */
+export type GoogleCloudUploadResult = unknown
+
 export type GoogleCloudStorageConfig = {
+  provider: 'gcs'
   access_key: string
   bucket: string
   expires: string
@@ -27,6 +37,7 @@ export type GoogleCloudStorageConfig = {
 }
 
 export type S3StorageConfig = {
+  provider: 's3'
   access_key: string
   secret_key: string
   bucket: string
@@ -35,6 +46,7 @@ export type S3StorageConfig = {
 }
 
 export type MinIOStorageConfig = {
+  provider: 'minio'
   access_key: string
   secret_key: string
   bucket: string
@@ -46,8 +58,9 @@ export type MinIOStorageConfig = {
 }
 
 export type LocalStorageConfig = {
+  provider: 'local'
   local_path: string
-  local_url?: string
+  local_url?: string | undefined
 }
 
 export type StorageType = 'local' | 's3' | 'minio' | 'gcs'

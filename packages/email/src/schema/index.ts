@@ -4,6 +4,6 @@ export type EmailDriver = {
   driver: 'smtp' | 'resend'
 }
 
-export const EmailSchema: z.Schema<EmailDriver> = z.object({
+export const EmailSchema: z.ZodType<EmailDriver> = z.object({
   driver: z.enum(['smtp', 'resend']),
 })

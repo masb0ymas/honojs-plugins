@@ -27,41 +27,45 @@ export default class Storage {
     switch (value.provider) {
       case 'local':
         return new LocalStorage({
-          local_path: value.local_path!,
+          provider: value.provider,
+          local_path: value.local_path,
           ...(value.local_url !== undefined && { local_url: value.local_url }),
         })
 
       case 's3':
         return new S3Storage({
-          access_key: value.access_key!,
-          secret_key: value.secret_key!,
-          bucket: value.bucket!,
-          expires: value.expires!,
-          region: value.region!,
+          provider: value.provider,
+          access_key: value.access_key,
+          secret_key: value.secret_key,
+          bucket: value.bucket,
+          expires: value.expires,
+          region: value.region,
         })
 
       case 'minio':
         return new MinIOStorage({
-          access_key: value.access_key!,
-          secret_key: value.secret_key!,
-          bucket: value.bucket!,
-          expires: value.expires!,
-          region: value.region!,
-          host: value.host!,
-          port: value.port!,
-          ssl: value.ssl!,
+          provider: value.provider,
+          access_key: value.access_key,
+          secret_key: value.secret_key,
+          bucket: value.bucket,
+          expires: value.expires,
+          region: value.region,
+          host: value.host,
+          port: value.port,
+          ssl: value.ssl,
         })
 
       case 'gcs':
         return new GoogleCloudStorage({
-          access_key: value.access_key!,
-          bucket: value.bucket!,
-          expires: value.expires!,
-          filepath: value.filepath!,
+          provider: value.provider,
+          access_key: value.access_key,
+          bucket: value.bucket,
+          expires: value.expires,
+          filepath: value.filepath,
         })
 
       default:
-        throw new Error(`Unsupported storage provider: ${value.provider}`)
+        throw new Error(`Unsupported storage provider: ${(value as { provider: string }).provider}`)
     }
   }
 }
@@ -78,6 +82,5 @@ export type {
   S3StorageConfig,
   StorageConfig,
   StorageInstance,
-  StorageType
+  StorageType,
 } from './types/storage'
-

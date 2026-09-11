@@ -1,5 +1,7 @@
 import fs from 'fs'
 import path from 'path'
+import { errorMessage } from '../lib/errors'
+import { buildKeyfile } from '../lib/keys'
 import { LocalStorageConfig, UploadFileParams } from '../types/storage'
 
 export default class LocalStorage {
@@ -7,15 +9,8 @@ export default class LocalStorage {
   private _baseUrl: string
 
   constructor(params: LocalStorageConfig) {
-    this._basePath = path.resolve(`${process.cwd()}/${params.local_path}`)
+    this._basePath = path.resolve(process.cwd(), params.local_path)
     this._baseUrl = params.local_url ?? '/uploads'
-  }
-
-  /**
-   * Generate keyfile
-   */
-  private _generateKeyfile(values: string[]): string {
-    return values.join('/')
   }
 
   /**
@@ -33,16 +28,16 @@ export default class LocalStorage {
   /**
    * Create bucket (base directory)
    */
-  private async _createBucket() {
+  private async _createBucket(): Promise<void> {
     try {
       await fs.promises.mkdir(this._basePath, { recursive: true })
 
       const message = `local - ${this._basePath} directory created`
       console.info(message)
-    } catch (error: any) {
-      const message = `local error: ${error.message ?? error}`
+    } catch (error: unknown) {
+      const message = `local error: ${errorMessage(error)}`
       console.error(message)
-      process.exit(1)
+      throw new Error(message, { cause: error })
     }
   }
 
@@ -53,7 +48,7 @@ export default class LocalStorage {
     directory,
     file,
   }: UploadFileParams): Promise<{ data: { path: string }; signedUrl: string }> {
-    const keyfile = this._generateKeyfile([directory, file.filename])
+    const keyfile = buildKeyfile([directory, file.filename])
     const destination = path.join(this._basePath, keyfile)
 
     await fs.promises.mkdir(path.dirname(destination), { recursive: true })
@@ -71,7 +66,9 @@ export default class LocalStorage {
    * Generate presigned URL (local file URL)
    */
   async presignedUrl(keyfile: string): Promise<string> {
-    const signedUrl = `${this._baseUrl}/${keyfile}`.replace(/\/+/g, '/')
+    // Only trim trailing slashes so absolute base URLs (https://host) stay intact.
+    const baseUrl = this._baseUrl.replace(/\/+$/, '')
+    const signedUrl = `${baseUrl}/${keyfile}`
 
     const message = `local - ${keyfile} presigned URL generated`
     console.info(message)

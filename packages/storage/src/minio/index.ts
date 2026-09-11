@@ -1,7 +1,8 @@
-import { addDays } from 'date-fns'
 import * as Minio from 'minio'
-import { ms } from '../lib/date'
-import { MinIOStorageConfig, UploadFileParams } from '../types/storage'
+import { errorMessage } from '../lib/errors'
+import { resolveExpires, type ExpiresObject } from '../lib/expires'
+import { buildKeyfile } from '../lib/keys'
+import { MinIOStorageConfig, MinIOUploadResult, UploadFileParams } from '../types/storage'
 
 export default class MinIOStorage {
   public client: Minio.Client
@@ -25,31 +26,19 @@ export default class MinIOStorage {
     this._ssl = params.ssl
 
     this.client = new Minio.Client({
-      endPoint: this._host || '127.0.0.1',
-      port: this._port || 9000,
-      useSSL: this._ssl || false,
+      endPoint: this._host,
+      port: this._port,
+      useSSL: this._ssl,
       accessKey: this._access_key,
       secretKey: this._secret_key,
     })
   }
 
   /**
-   * Generate keyfile
-   */
-  private _generateKeyfile(values: string[]) {
-    return values.join('/')
-  }
-
-  /**
    * Get expires object
    */
-  public expiresObject(): { expiresIn: number; expiryDate: Date } {
-    const getExpired = this._expires.replace(/[^0-9]/g, '')
-
-    const expiresIn = ms(this._expires)
-    const expiryDate = addDays(new Date(), Number(getExpired))
-
-    return { expiresIn, expiryDate }
+  public expiresObject(): ExpiresObject {
+    return resolveExpires(this._expires)
   }
 
   /**
@@ -71,19 +60,18 @@ export default class MinIOStorage {
   /**
    * Create bucket
    */
-  private async _createBucket() {
+  private async _createBucket(): Promise<void> {
     const bucketName = this._bucket
 
     try {
-      const data = await this.client.makeBucket(bucketName, this._region)
+      await this.client.makeBucket(bucketName, this._region)
 
       const message = `minio - ${bucketName} bucket created`
       console.info(message)
-      console.log(data)
-    } catch (error: any) {
-      const message = `minio error: ${error.message ?? error}`
+    } catch (error: unknown) {
+      const message = `minio error: ${errorMessage(error)}`
       console.error(message)
-      process.exit(1)
+      throw new Error(message, { cause: error })
     }
   }
 
@@ -93,13 +81,13 @@ export default class MinIOStorage {
   async uploadFile({
     directory,
     file,
-  }: UploadFileParams): Promise<{ data: any; signedUrl: string }> {
-    const keyfile = this._generateKeyfile([directory, file.filename])
+  }: UploadFileParams): Promise<{ data: MinIOUploadResult; signedUrl: string }> {
+    const keyfile = buildKeyfile([directory, file.filename])
 
     const options = {
-      ContentType: file.mimetype, // <-- this is what you need!
-      ContentDisposition: `inline; filename=${file.filename}`, // <-- and this !
-      ACL: 'public-read', // <-- this makes it public so people can see it
+      ContentType: file.mimetype,
+      ContentDisposition: `inline; filename=${file.filename}`,
+      ACL: 'public-read' as const,
     }
 
     const data = await this.client.fPutObject(this._bucket, keyfile, file.path, options)
@@ -114,7 +102,9 @@ export default class MinIOStorage {
   async presignedUrl(keyfile: string): Promise<string> {
     const bucketName = this._bucket
 
-    const signedUrl = await this.client.presignedGetObject(bucketName, keyfile)
+    const { expiresIn } = this.expiresObject()
+
+    const signedUrl = await this.client.presignedGetObject(bucketName, keyfile, expiresIn)
 
     const message = `minio - ${keyfile} presigned URL generated`
     console.info(message)

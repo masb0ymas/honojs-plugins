@@ -27,24 +27,27 @@ src/
 ├── google-cloud/
 │   └── index.ts           # GoogleCloudStorage driver
 ├── lib/
-│   └── date.ts             # ms() helper for parsing time strings
+│   ├── date.ts            # ms() helper for parsing time strings
+│   ├── errors.ts          # errorMessage() / isNotFoundError() helpers
+│   ├── expires.ts         # resolveExpires() -> { expiresIn, expiryDate }
+│   └── keys.ts            # buildKeyfile() object-key builder
 ├── schema/
-│   └── storage.ts          # StorageSchema (Zod validation + provider-conditional refinement)
+│   └── storage.ts          # StorageSchema (Zod discriminated union per provider)
 └── types/
-    ├── storage.ts           # StorageType, *Params, StorageConfig, StorageInstance, FileParams, UploadFileParams
+    ├── storage.ts           # StorageType, *Config, StorageConfig, StorageInstance, FileParams, UploadFileParams
     └── time.ts
 ```
 
 ## Usage
 
-`Storage.create()` accepts a flat configuration object with camelCase keys. The `provider` field determines which driver is instantiated. The schema validates required fields per provider.
+`Storage.create()` accepts a flat configuration object. The `provider` field determines which driver is instantiated. The schema validates required fields per provider.
 
 Every driver exposes:
 
 - `initialize()` — ensures the bucket/base directory exists (creates it if missing)
 - `uploadFile({ directory, file })` — uploads a file, returns `{ data, signedUrl }`
 - `presignedUrl(keyfile)` — generates a (signed) URL to access the file
-- `expiresObject()` — (S3/MinIO/GCS) returns `{ expiresIn, expiryDate }` derived from `signExpired`
+- `expiresObject()` — (S3/MinIO/GCS) returns `{ expiresIn, expiryDate }` derived from `expires`
 
 ### 1. Local disk
 
@@ -81,11 +84,11 @@ import Storage, { S3Storage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   provider: 's3',
-  accessKey: process.env.AWS_ACCESS_KEY_ID!,
-  secretKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  bucketName: 'my-bucket',
+  access_key: process.env.AWS_ACCESS_KEY_ID!,
+  secret_key: process.env.AWS_SECRET_ACCESS_KEY!,
+  bucket: 'my-bucket',
   region: 'us-east-1',
-  signExpired: '7d', // presigned URL TTL
+  expires: '7d', // presigned URL TTL
 } as S3StorageConfig) as S3Storage
 
 await storage.initialize()
@@ -115,14 +118,14 @@ import Storage, { MinIOStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   provider: 'minio',
-  accessKey: process.env.MINIO_ACCESS_KEY!,
-  secretKey: process.env.MINIO_SECRET_KEY!,
-  bucketName: 'my-bucket',
+  access_key: process.env.MINIO_ACCESS_KEY!,
+  secret_key: process.env.MINIO_SECRET_KEY!,
+  bucket: 'my-bucket',
   region: 'us-east-1',
   host: '127.0.0.1',
   port: 9000,
   ssl: false,
-  signExpired: '7d',
+  expires: '7d',
 } as MinIOStorageConfig) as MinIOStorage
 
 await storage.initialize()
@@ -139,10 +142,10 @@ import Storage, { GoogleCloudStorage } from 'honojs-plugin-storage'
 
 const storage = Storage.create({
   provider: 'gcs',
-  accessKey: process.env.GCP_PROJECT_ID!,
-  bucketName: 'my-bucket',
+  access_key: process.env.GCP_PROJECT_ID!,
+  bucket: 'my-bucket',
   filepath: 'gcp-serviceAccount.json', // relative to process.cwd()
-  signExpired: '7d',
+  expires: '7d',
 } as GoogleCloudStorageConfig) as GoogleCloudStorage
 
 await storage.initialize()
@@ -152,7 +155,7 @@ const { signedUrl } = await storage.uploadFile({ directory: 'files', file /* Fil
 storage.client.bucket('my-bucket').file('key').getSignedUrl(/* ... */)
 ```
 
-> `filepath` must point to a valid GCP service account JSON in your project root. If the file is missing and `accessKey` is not provided, `GoogleCloudStorage` throws on construction.
+> `filepath` must point to a valid GCP service account JSON in your project root. `GoogleCloudStorage` throws on construction if the file is missing.
 
 ## Example: Hono file upload route
 
@@ -164,11 +167,11 @@ const app = new Hono()
 
 const storage = Storage.create({
   provider: 's3',
-  accessKey: process.env.AWS_ACCESS_KEY_ID!,
-  secretKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  bucketName: process.env.STORAGE_BUCKET_NAME!,
+  access_key: process.env.AWS_ACCESS_KEY_ID!,
+  secret_key: process.env.AWS_SECRET_ACCESS_KEY!,
+  bucket: process.env.STORAGE_BUCKET_NAME!,
   region: process.env.STORAGE_REGION!,
-  signExpired: '7d',
+  expires: '7d',
 } as S3StorageConfig) as S3Storage
 
 app.post('/upload', async (c) => {
@@ -202,31 +205,31 @@ export default app
 
 ### `Storage.create(config)`
 
-Accepts a flat object with camelCase keys. The `provider` field determines which driver is used. Fields are validated conditionally — only the fields required by the chosen provider are enforced.
+Accepts a flat object. The `provider` field determines which driver is used. Fields are validated conditionally — only the fields required by the chosen provider are enforced.
 
-| Key           | Type                                  | Required for         | Description                                               |
-| ------------- | ------------------------------------- | -------------------- | --------------------------------------------------------- |
-| `provider`    | `'local' \| 's3' \| 'minio' \| 'gcs'` | all                  | Storage provider                                          |
-| `basePath`    | `string`                              | `local`              | Base directory path for local storage                     |
-| `baseUrl`     | `string`                              | —                    | Base URL for local presigned URLs (default: `/uploads`)   |
-| `accessKey`   | `string`                              | `s3`, `minio`, `gcs` | Access key / project ID                                   |
-| `secretKey`   | `string`                              | `s3`, `minio`        | Secret key                                                |
-| `bucketName`  | `string`                              | `s3`, `minio`, `gcs` | Bucket name                                               |
-| `region`      | `string`                              | `s3`, `minio`        | Region                                                    |
-| `signExpired` | `string`                              | `s3`, `minio`, `gcs` | Presigned URL TTL (e.g. `'7d'`, `'24h'`, `'30min'`)       |
-| `host`        | `string`                              | `minio`              | MinIO host                                                |
-| `port`        | `number`                              | `minio`              | MinIO port                                                |
-| `ssl`         | `boolean`                             | `minio`              | Use SSL for MinIO (accepts `true`/`false`/`'true'`/`'1'`) |
-| `filepath`    | `string`                              | `gcs`                | Path to GCP service account JSON file                     |
+| Key          | Type                                  | Required for         | Description                                               |
+| ------------ | ------------------------------------- | -------------------- | --------------------------------------------------------- |
+| `provider`   | `'local' \| 's3' \| 'minio' \| 'gcs'` | all                  | Storage provider                                          |
+| `local_path` | `string`                              | `local`              | Base directory path for local storage                     |
+| `local_url`  | `string`                              | —                    | Base URL for local presigned URLs (default: `/uploads`)   |
+| `access_key` | `string`                              | `s3`, `minio`, `gcs` | Access key / GCP project ID                               |
+| `secret_key` | `string`                              | `s3`, `minio`        | Secret key                                                |
+| `bucket`     | `string`                              | `s3`, `minio`, `gcs` | Bucket name                                               |
+| `region`     | `string`                              | `s3`, `minio`        | Region                                                    |
+| `expires`    | `string`                              | `s3`, `minio`, `gcs` | Presigned URL TTL (e.g. `'7d'`, `'24h'`, `'30min'`)       |
+| `host`       | `string`                              | `minio`              | MinIO host                                                |
+| `port`       | `number`                              | `minio`              | MinIO port                                                |
+| `ssl`        | `boolean`                             | `minio`              | Use SSL for MinIO (accepts `true`/`false`/`'true'`/`'1'`) |
+| `filepath`   | `string`                              | `gcs`                | Path to GCP service account JSON file                     |
 
 ### Common driver methods
 
-| Method                            | Description                                                                                 |
-| --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `initialize()`                    | Creates the bucket/base directory if it doesn't exist                                       |
-| `uploadFile({ directory, file })` | Uploads `file` under `directory`, returns `{ data, signedUrl }`                             |
-| `presignedUrl(keyfile)`           | Returns a signed/accessible URL for `keyfile`                                               |
-| `expiresObject()`                 | (S3/MinIO/GCS) returns `{ expiresIn: number, expiryDate: Date }` derived from `signExpired` |
+| Method                            | Description                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `initialize()`                    | Creates the bucket/base directory if it doesn't exist                                   |
+| `uploadFile({ directory, file })` | Uploads `file` under `directory`, returns `{ data, signedUrl }`                         |
+| `presignedUrl(keyfile)`           | Returns a signed/accessible URL for `keyfile`                                           |
+| `expiresObject()`                 | (S3/MinIO/GCS) returns `{ expiresIn: number, expiryDate: Date }` derived from `expires` |
 
 ### Driver-specific properties
 

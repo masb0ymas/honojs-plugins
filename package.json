@@ -14,6 +14,8 @@
     "typecheck": "tsc --build",
     "typecheck:clean": "tsc --build --clean",
     "typecheck:watch": "tsc --build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
     "lint:fix": "turbo run lint --continue -- --fix --cache --cache-location .cache/.eslintcache",
     "format": "prettier --check . --cache --cache-location .cache/.prettiercache",
@@ -39,7 +41,8 @@
     "publint": "^0.3.24",
     "tsdown": "^0.23.0",
     "turbo": "^2.10.12",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "packageManager": "pnpm@11.10.0",
   "engines": {

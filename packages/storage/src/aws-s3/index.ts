@@ -1,8 +1,9 @@
 import * as S3Client from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { addDays } from 'date-fns'
 import fs from 'fs'
-import { ms } from '../lib/date'
+import { errorMessage, isNotFoundError } from '../lib/errors'
+import { resolveExpires, type ExpiresObject } from '../lib/expires'
+import { buildKeyfile } from '../lib/keys'
 import { S3StorageConfig, UploadFileParams } from '../types/storage'
 
 export default class S3Storage {
@@ -30,22 +31,10 @@ export default class S3Storage {
   }
 
   /**
-   * Generate keyfile
-   */
-  private _generateKeyfile(values: string[]): string {
-    return values.join('/')
-  }
-
-  /**
    * Get expires object
    */
-  public expiresObject(): { expiresIn: number; expiryDate: Date } {
-    const getExpired = this._expires.replace(/[^0-9]/g, '')
-
-    const expiresIn = ms(this._expires)
-    const expiryDate = addDays(new Date(), Number(getExpired))
-
-    return { expiresIn, expiryDate }
+  public expiresObject(): ExpiresObject {
+    return resolveExpires(this._expires)
   }
 
   /**
@@ -61,9 +50,13 @@ export default class S3Storage {
       const message = `aws s3 - ${bucketName} bucket found`
       console.log(message)
       console.log(data.Grants)
-    } catch (error: any) {
-      const message = `aws s3 - ${bucketName} bucket not found`
-      console.error(message)
+    } catch (error: unknown) {
+      if (!isNotFoundError(error)) {
+        console.error(`aws s3 - ${bucketName} initialize failed: ${errorMessage(error)}`)
+        throw error
+      }
+
+      console.error(`aws s3 - ${bucketName} bucket not found`)
       // create bucket if not exists
       await this._createBucket()
     }
@@ -72,7 +65,7 @@ export default class S3Storage {
   /**
    * Create bucket
    */
-  private async _createBucket() {
+  private async _createBucket(): Promise<void> {
     const bucketName = this._bucket
 
     try {
@@ -82,10 +75,10 @@ export default class S3Storage {
       const message = `aws s3 - ${bucketName} bucket created`
       console.log(message)
       console.log(data)
-    } catch (error: any) {
-      const message = `aws s3 error: ${error.message ?? error}`
+    } catch (error: unknown) {
+      const message = `aws s3 error: ${errorMessage(error)}`
       console.error(message)
-      process.exit(1)
+      throw new Error(message, { cause: error })
     }
   }
 
@@ -96,15 +89,15 @@ export default class S3Storage {
     data: S3Client.PutObjectCommandOutput
     signedUrl: string
   }> {
-    const keyfile = this._generateKeyfile([directory, file.filename])
+    const keyfile = buildKeyfile([directory, file.filename])
 
     const command = new S3Client.PutObjectCommand({
       Bucket: this._bucket,
       Key: keyfile,
       Body: fs.createReadStream(file.path),
-      ContentType: file.mimetype, // <-- this is what you need!
-      ContentDisposition: `inline; filename=${file.filename}`, // <-- and this !
-      ACL: 'public-read', // <-- this makes it public so people can see it
+      ContentType: file.mimetype,
+      ContentDisposition: `inline; filename=${file.filename}`,
+      ACL: 'public-read',
     })
 
     const data = await this.client.send(command)
@@ -120,7 +113,6 @@ export default class S3Storage {
     const bucketName = this._bucket
 
     const { expiresIn } = this.expiresObject()
-    const newExpiresIn = expiresIn / 1000
 
     const command = new S3Client.GetObjectCommand({
       Bucket: bucketName,
@@ -128,7 +120,7 @@ export default class S3Storage {
     })
 
     const signedUrl = await getSignedUrl(this.client, command, {
-      expiresIn: newExpiresIn,
+      expiresIn,
     })
 
     const message = `aws s3 - ${keyfile} presigned URL generated`

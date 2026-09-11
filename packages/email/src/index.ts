@@ -1,31 +1,31 @@
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
-import { Resend } from 'resend'
 import Nodemailer from './nodemailer'
+import ResendMailer from './resend'
 import { EmailSchema } from './schema'
 import { NodemailerSchema } from './schema/nodemailer'
 import { ResendSchema } from './schema/resend'
 import { EmailConfig } from './types/email'
 
 /**
- * SMTP email service
+ * Email service
  */
-export default class Smtp {
+export default class Email {
   /**
    * Create an email service instance
    * @param config - Email configuration
    * @returns Email service instance
    */
-  static create({ driver, config }: EmailConfig): Nodemailer | Resend | undefined {
-    const parsed = EmailSchema.safeParse({ driver })
-    if (!parsed.success) {
+  static create(config: EmailConfig): Nodemailer | ResendMailer {
+    const parsedDriver = EmailSchema.safeParse({ driver: config.driver })
+    if (!parsedDriver.success) {
       throw new Error('Invalid email parameters', {
-        cause: parsed.error,
+        cause: parsedDriver.error,
       })
     }
 
     // SMTP using Nodemailer
-    if (parsed.data.driver === 'smtp') {
-      const parsed = NodemailerSchema.safeParse(config)
+    if (config.driver === 'smtp') {
+      const parsed = NodemailerSchema.safeParse(config.config)
       if (!parsed.success) {
         throw new Error('Invalid nodemailer configuration', {
           cause: parsed.error,
@@ -51,28 +51,27 @@ export default class Smtp {
       return new Nodemailer({ transporter, defaults: { from: nodemailerConfig.from } })
     }
 
-    // SMTP using Resend
-    if (parsed.data.driver === 'resend') {
-      const parsed = ResendSchema.safeParse(config)
-      if (!parsed.success) {
-        throw new Error('Invalid resend configuration', {
-          cause: parsed.error,
-        })
-      }
-
-      const resendConfig = parsed.data
-
-      const resendOptions: { baseUrl?: string; userAgent?: string } = {}
-      if (resendConfig.baseUrl) resendOptions.baseUrl = resendConfig.baseUrl
-      if (resendConfig.userAgent) resendOptions.userAgent = resendConfig.userAgent
-
-      return new Resend(resendConfig.apiKey, resendOptions)
+    // Resend
+    const parsed = ResendSchema.safeParse(config.config)
+    if (!parsed.success) {
+      throw new Error('Invalid resend configuration', {
+        cause: parsed.error,
+      })
     }
 
-    return undefined
+    const resendConfig = parsed.data
+
+    return new ResendMailer({
+      apiKey: resendConfig.apiKey,
+      ...(resendConfig.from !== undefined && { from: resendConfig.from }),
+      ...(resendConfig.baseUrl !== undefined && { baseUrl: resendConfig.baseUrl }),
+      ...(resendConfig.userAgent !== undefined && { userAgent: resendConfig.userAgent }),
+    })
   }
 }
 
 export { Resend } from 'resend'
 export { default as Nodemailer } from './nodemailer'
-
+export { default as ResendMailer } from './resend'
+export type { ResendMailerParams, ResendSendOptions } from './resend'
+export type { EmailConfig, EmailType } from './types/email'

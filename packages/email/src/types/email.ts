@@ -3,7 +3,5 @@ import { ResendConfig } from '../schema/resend'
 
 export type EmailType = 'smtp' | 'resend'
 
-export type EmailConfig = {
-  driver: EmailType
-  config: NodemailerConfig | ResendConfig
-}
+export type EmailConfig =
+  { driver: 'smtp'; config: NodemailerConfig } | { driver: 'resend'; config: ResendConfig }

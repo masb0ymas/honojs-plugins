@@ -1,78 +1,50 @@
 import z from 'zod'
+import type { StorageConfig } from '../types/storage'
 
-type StorageSchemaType = {
-  provider: 'local' | 's3' | 'minio' | 'gcs'
-  host?: string | undefined
-  port?: number | undefined
-  access_key?: string | undefined
-  secret_key?: string | undefined
-  bucket?: string | undefined
-  region?: string | undefined
-  expires?: string | undefined
-  filepath?: string | undefined
-  local_path?: string | undefined
-  local_url?: string | undefined
-  ssl?: boolean | undefined
-}
+const localSchema = z.object({
+  provider: z.literal('local'),
+  local_path: z.string().min(1, "local_path is required for provider 'local'"),
+  local_url: z.string().optional(),
+})
 
-export const StorageSchema: z.ZodType<StorageSchemaType> = z
-  .object({
-    provider: z.enum(['local', 's3', 'minio', 'gcs']),
-    host: z.string().optional(),
-    port: z.coerce.number().int().optional(),
-    access_key: z.string().optional(),
-    secret_key: z.string().optional(),
-    bucket: z.string().optional(),
-    region: z.string().optional(),
-    expires: z.string().optional(),
-    filepath: z.string().optional(),
-    local_path: z.string().optional(),
-    local_url: z.string().optional(),
-    ssl: z
-      .preprocess((val) => {
-        if (val === 'true' || val === '1') return true
-        if (val === 'false' || val === '0') return false
-        return val
-      }, z.boolean())
-      .optional(),
-  })
-  .superRefine((val, ctx) => {
-    const required = (field: string, value: unknown) => {
-      if (value == null || value === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `${field} is required for provider '${val.provider}'`,
-          path: [field],
-        })
-      }
-    }
+const s3Schema = z.object({
+  provider: z.literal('s3'),
+  access_key: z.string().min(1, "access_key is required for provider 's3'"),
+  secret_key: z.string().min(1, "secret_key is required for provider 's3'"),
+  bucket: z.string().min(1, "bucket is required for provider 's3'"),
+  expires: z.string().min(1, "expires is required for provider 's3'"),
+  region: z.string().min(1, "region is required for provider 's3'"),
+})
 
-    switch (val.provider) {
-      case 'local':
-        required('local_path', val.local_path)
-        break
-      case 's3':
-        required('access_key', val.access_key)
-        required('secret_key', val.secret_key)
-        required('bucket', val.bucket)
-        required('expires', val.expires)
-        required('region', val.region)
-        break
-      case 'minio':
-        required('access_key', val.access_key)
-        required('secret_key', val.secret_key)
-        required('bucket', val.bucket)
-        required('expires', val.expires)
-        required('region', val.region)
-        required('host', val.host)
-        required('port', val.port)
-        required('ssl', val.ssl)
-        break
-      case 'gcs':
-        required('access_key', val.access_key)
-        required('bucket', val.bucket)
-        required('expires', val.expires)
-        required('filepath', val.filepath)
-        break
-    }
-  })
+const booleanFromString = z.preprocess((val) => {
+  if (val === 'true' || val === '1') return true
+  if (val === 'false' || val === '0') return false
+  return val
+}, z.boolean())
+
+const minioSchema = z.object({
+  provider: z.literal('minio'),
+  access_key: z.string().min(1, "access_key is required for provider 'minio'"),
+  secret_key: z.string().min(1, "secret_key is required for provider 'minio'"),
+  bucket: z.string().min(1, "bucket is required for provider 'minio'"),
+  expires: z.string().min(1, "expires is required for provider 'minio'"),
+  region: z.string().min(1, "region is required for provider 'minio'"),
+  host: z.string().min(1, "host is required for provider 'minio'"),
+  port: z.coerce.number().int().positive(),
+  ssl: booleanFromString,
+})
+
+const gcsSchema = z.object({
+  provider: z.literal('gcs'),
+  access_key: z.string().min(1, "access_key is required for provider 'gcs'"),
+  bucket: z.string().min(1, "bucket is required for provider 'gcs'"),
+  expires: z.string().min(1, "expires is required for provider 'gcs'"),
+  filepath: z.string().min(1, "filepath is required for provider 'gcs'"),
+})
+
+export const StorageSchema: z.ZodType<StorageConfig> = z.discriminatedUnion('provider', [
+  localSchema,
+  s3Schema,
+  minioSchema,
+  gcsSchema,
+])

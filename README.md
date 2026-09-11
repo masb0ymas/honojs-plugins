@@ -9,8 +9,9 @@ honojs-plugins/
 ├── packages/
 │   ├── email/                 # honojs-plugin-email — SMTP (Nodemailer) & Resend email driver
 │   │   ├── src/
-│   │   │   ├── index.ts        # Smtp.create() factory, exports Nodemailer/Resend
+│   │   │   ├── index.ts        # Email.create() factory, exports Nodemailer/ResendMailer
 │   │   │   ├── nodemailer/     # Nodemailer wrapper (index.ts, types.ts)
+│   │   │   ├── resend/         # ResendMailer wrapper (default sender)
 │   │   │   └── schema/         # zod schemas: index.ts, nodemailer.ts, resend.ts
 │   │   ├── package.json
 │   │   └── tsdown.config.ts
@@ -22,7 +23,7 @@ honojs-plugins/
 │   │   │   ├── aws-s3/         # AWS S3 driver
 │   │   │   ├── minio/          # MinIO driver
 │   │   │   ├── google-cloud/   # Google Cloud Storage driver
-│   │   │   ├── lib/            # date.ts helper (ms/expiry parsing)
+│   │   │   ├── lib/            # date.ts, expires.ts, keys.ts, errors.ts helpers
 │   │   │   ├── schema/         # zod schema: storage.ts
 │   │   │   └── types/          # storage.ts, time.ts
 │   │   ├── package.json
@@ -76,8 +77,6 @@ pnpm lint
 # format
 pnpm format
 ```
-
-
 
 ## Publishing
 

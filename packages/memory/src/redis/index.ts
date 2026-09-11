@@ -40,7 +40,11 @@ export default class RedisCache implements CacheDriver {
     const serialized = JSON.stringify(value)
     const expires = ttl ?? this._defaultTtl
 
-    if (expires) {
+    if (expires !== undefined) {
+      if (expires <= 0) {
+        throw new Error('ttl must be a positive number of seconds')
+      }
+
       await this.client.set(key, serialized, 'EX', expires)
       return
     }
@@ -64,9 +68,35 @@ export default class RedisCache implements CacheDriver {
   }
 
   /**
-   * Clear the cache
+   * Clear the cache.
+   *
+   * Deletes only the keys owned by this client's configured `keyPrefix` rather
+   * than flushing the entire database, so other applications sharing the DB are
+   * unaffected. Without a `keyPrefix` the whole DB is flushed, matching the
+   * previous behaviour.
    */
   async clear(): Promise<void> {
-    await this.client.flushdb()
+    const prefix = this.client.options.keyPrefix
+
+    if (!prefix) {
+      await this.client.flushdb()
+      return
+    }
+
+    const stream = this.client.scanStream({ match: `${prefix}*` })
+    const keys: string[] = []
+
+    for await (const batch of stream) {
+      // SCAN returns fully-qualified keys (already carrying the prefix), while
+      // DEL re-applies `keyPrefix`; strip it so keys are not double-prefixed.
+      for (const key of batch as string[]) {
+        keys.push(key.startsWith(prefix) ? key.slice(prefix.length) : key)
+      }
+
+      if (keys.length > 0) {
+        await this.client.del(...keys)
+        keys.length = 0
+      }
+    }
   }
 }
