@@ -24,8 +24,8 @@
   "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
   "dependencies": {
     "nodemailer": "^9.1.1",
-    "resend": "^6.26.0",
-    "zod": "^4.5.4"
+    "resend": "^6.27.0",
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.1"
