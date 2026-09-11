@@ -25,12 +25,12 @@
   ],
   "author": "masb0ymas <me@masb0ymas.com> (https://github.com/masb0ymas)",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1126.0",
-    "@aws-sdk/s3-request-presigner": "^3.1126.0",
+    "@aws-sdk/client-s3": "^3.1130.0",
+    "@aws-sdk/s3-request-presigner": "^3.1130.0",
     "@google-cloud/storage": "^7.21.0",
     "date-fns": "^4.4.0",
     "minio": "^8.0.7",
-    "zod": "^4.5.4"
+    "zod": "^4.6.2"
   },
   "exports": {
     ".": "./src/index.ts",

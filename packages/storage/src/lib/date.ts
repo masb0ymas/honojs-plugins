@@ -1,23 +1,26 @@
-import type { Second } from '../types/time'
+import type { Milliseconds } from '../types/time'
 
 /**
- * Convert time string to milliseconds
+ * Convert a duration string or number to milliseconds.
  * Supports: ms, s, sec, m, min, h, hr, d, day, w, week, y, year
- * @param value - Time string (e.g., "7d", "2h", "30min", "1.5h")
+ * @param value - Duration string (e.g., "7d", "2h", "30min", "1.5h") or milliseconds
  * @returns Milliseconds
- * @throws Error if invalid format or unsupported unit
+ * @throws Error if invalid format, unsupported unit, or negative duration
  * @example
  * ms("2d") // 172800000
  * ms("1.5h") // 5400000
  * ms("30min") // 1800000
  */
-export function ms(value: string | number): Second {
+export function ms(value: string | number): Milliseconds {
   // If already a number, assume it's milliseconds
   if (typeof value === 'number') {
-    if (isNaN(value) || !isFinite(value)) {
+    if (!Number.isFinite(value)) {
       throw new Error('Invalid number provided')
     }
-    return Math.abs(value)
+    if (value < 0) {
+      throw new Error('Duration must not be negative')
+    }
+    return value
   }
 
   // Validate input
@@ -30,7 +33,7 @@ export function ms(value: string | number): Second {
 
   // Match number and unit using regex
   const match = normalized.match(
-    /^(-?\d*\.?\d+)\s*(ms|milliseconds?|s|secs?|seconds?|m|mins?|minutes?|h|hrs?|hours?|d|days?|w|weeks?|y|years?)$/i
+    /^(\d*\.?\d+)\s*(ms|milliseconds?|s|secs?|seconds?|m|mins?|minutes?|h|hrs?|hours?|d|days?|w|weeks?|y|years?)$/
   )
 
   if (!match) {
@@ -40,7 +43,7 @@ export function ms(value: string | number): Second {
   const [, numStr, unit] = match
   const num = parseFloat(String(numStr))
 
-  if (isNaN(num) || !isFinite(num)) {
+  if (!Number.isFinite(num)) {
     throw new Error(`Invalid number: "${numStr}"`)
   }
 
@@ -100,10 +103,10 @@ export function ms(value: string | number): Second {
     throw new Error(`Unsupported time unit: "${unit}"`)
   }
 
-  const result = Math.abs(num * factor)
+  const result = num * factor
 
   // Check for overflow
-  if (!isFinite(result)) {
+  if (!Number.isFinite(result)) {
     throw new Error(`Result overflow: "${value}" produces infinite milliseconds`)
   }
 

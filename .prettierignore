@@ -12,5 +12,12 @@ packages/node-ws
 # Lockfiles
 pnpm-lock.yaml
 
+# Build output and caches
+dist
+coverage
+.cache
+.turbo
+graft
+
 # Generated files (must stay byte-identical to the prebuild output)
 packages/ua-blocker/src/generated.ts

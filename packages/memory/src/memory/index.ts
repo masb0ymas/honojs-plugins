@@ -35,7 +35,11 @@ export default class MemoryCache implements CacheDriver {
   async set<T = unknown>(key: string, value: T, ttl?: number): Promise<void> {
     const expires = ttl ?? this._defaultTtl
 
-    if (expires) {
+    if (expires !== undefined) {
+      if (expires <= 0) {
+        throw new Error('ttl must be a positive number of seconds')
+      }
+
       this._client.set(key, { value }, { ttl: expires * 1000 })
       return
     }

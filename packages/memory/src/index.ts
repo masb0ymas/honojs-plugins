@@ -15,12 +15,12 @@ export default class Cache {
    * @returns Cache service instance
    */
   static create({ driver, config }: CacheParams): CacheInstance {
-    const parsed = CacheSchema.safeParse({ driver })
-    if (!parsed.success) {
-      throw new Error('Invalid cache driver', { cause: parsed.error })
+    const parsedDriver = CacheSchema.safeParse({ driver })
+    if (!parsedDriver.success) {
+      throw new Error('Invalid cache parameters', { cause: parsedDriver.error })
     }
 
-    switch (parsed.data.driver) {
+    switch (parsedDriver.data.driver) {
       case 'memory': {
         const parsed = MemorySchema.safeParse(config)
         if (!parsed.success) {
@@ -40,7 +40,7 @@ export default class Cache {
       }
 
       default:
-        throw new Error('Invalid cache type')
+        throw new Error(`Unsupported cache driver: ${String(driver)}`)
     }
   }
 }
@@ -48,4 +48,3 @@ export default class Cache {
 export { default as MemoryCache } from './memory'
 export { default as RedisCache } from './redis'
 export type { CacheDriver, CacheInstance, CacheParams, CacheType } from './types/cache'
-

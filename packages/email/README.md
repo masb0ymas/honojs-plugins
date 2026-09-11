@@ -15,14 +15,16 @@ pnpm add honojs-plugin-email
 
 ```
 src/
-├── index.ts              # Smtp.create() factory + exports
+├── index.ts              # Email.create() factory + exports
 ├── nodemailer/
 │   ├── index.ts           # Nodemailer wrapper class (initialize, send)
 │   └── types.ts           # NodemailerParams type
+├── resend/
+│   └── index.ts           # ResendMailer wrapper class (default from, send)
 ├── schema/
 │   ├── index.ts           # EmailSchema (driver: 'smtp' | 'resend')
-│   ├── nodemailer.ts       # NodemailerSchema / NodemailerRawSchema (MAIL_* env-shaped config)
-│   └── resend.ts           # ResendSchema / ResendRawSchema (RESEND_* env-shaped config)
+│   ├── nodemailer.ts       # NodemailerSchema (normalized config)
+│   └── resend.ts           # ResendSchema (normalized config)
 └── types/
     └── email.ts            # EmailConfig, EmailType
 ```
@@ -32,9 +34,9 @@ src/
 ### 1. SMTP (Nodemailer)
 
 ```ts
-import Smtp, { Nodemailer } from 'honojs-plugin-email'
+import Email, { Nodemailer } from 'honojs-plugin-email'
 
-const mailer = Smtp.create({
+const mailer = Email.create({
   driver: 'smtp',
   config: {
     host: 'smtp.example.com',
@@ -62,9 +64,9 @@ await mailer.send({
 ### 2. Resend
 
 ```ts
-import Smtp, { Resend } from 'honojs-plugin-email'
+import Email, { ResendMailer } from 'honojs-plugin-email'
 
-const resend = Smtp.create({
+const resend = Email.create({
   driver: 'resend',
   config: {
     apiKey: process.env.RESEND_API_KEY!,
@@ -72,9 +74,17 @@ const resend = Smtp.create({
     baseUrl: 'https://api.resend.com', // optional
     userAgent: 'my-app', // optional
   },
-}) as Resend
+}) as ResendMailer
 
-await resend.emails.send({
+// `from` falls back to the configured default when omitted
+await resend.send({
+  to: 'user@example.com',
+  subject: 'Welcome!',
+  html: '<p>Hello world</p>',
+})
+
+// access the underlying Resend client for advanced usage
+resend.client.emails.send({
   from: 'no-reply@example.com',
   to: 'user@example.com',
   subject: 'Welcome!',
@@ -104,11 +114,11 @@ await mailer.send({ to: 'user@example.com', subject: 'Hi', text: 'Hello' })
 
 ```ts
 import { Hono } from 'hono'
-import Smtp, { Nodemailer } from 'honojs-plugin-email'
+import Email, { Nodemailer } from 'honojs-plugin-email'
 
 const app = new Hono()
 
-const mailer = Smtp.create({
+const mailer = Email.create({
   driver: 'smtp',
   config: {
     host: process.env.MAIL_HOST,
@@ -136,14 +146,14 @@ export default app
 
 ## API
 
-### `Smtp.create(config)`
+### `Email.create(config)`
 
 | Param           | Type                               | Description                   |
 | --------------- | ---------------------------------- | ----------------------------- |
 | `config.driver` | `'smtp' \| 'resend'`               | Which email driver to use     |
 | `config.config` | `NodemailerConfig \| ResendConfig` | Driver-specific configuration |
 
-Returns a `Nodemailer` instance or the `Resend` client, depending on `driver`. Returns `undefined` if the driver is unrecognized.
+Returns a `Nodemailer` instance or a `ResendMailer` wrapper, depending on `driver`. Throws if the driver or the driver-specific configuration is invalid.
 
 #### `NodemailerConfig`
 
@@ -172,3 +182,10 @@ Returns a `Nodemailer` instance or the `Resend` client, depending on `driver`. R
 | --------------- | ----------------------------------------------- |
 | `initialize()`  | Verifies the SMTP transporter connection        |
 | `send(options)` | Sends an email via `nodemailer.SendMailOptions` |
+
+### `ResendMailer`
+
+| Property/Method | Description                                                |
+| --------------- | ---------------------------------------------------------- |
+| `client`        | Underlying `Resend` client for advanced operations         |
+| `send(options)` | Sends an email, defaulting `from` to the configured sender |
