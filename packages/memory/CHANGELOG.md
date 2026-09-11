@@ -1,5 +1,11 @@
 # honojs-plugin-memory
 
+## 1.0.2
+
+### Patch Changes
+
+- [#17](https://github.com/masb0ymas/honojs-plugins/pull/17) [`337e36e`](https://github.com/masb0ymas/honojs-plugins/commit/337e36e47442cf547dddebab596aba0c9e10ac32) Thanks [@masb0ymas](https://github.com/masb0ymas)! - fix: update dependencies and add licenses
+
 ## 1.0.1
 
 ### Patch Changes
